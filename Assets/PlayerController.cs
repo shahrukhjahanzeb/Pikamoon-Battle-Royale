@@ -31,6 +31,9 @@ public class PlayerController : NetworkBehaviour
         GetComponent<PlayerInput>().enabled = true;
       //  StartCoroutine(SpawnTest());
         userName = GameManager.instance._playerName;
+        NetworkedHealth = 45;
+        DealDamageRpc(userName);
+
     }
 
     IEnumerator SpawnTest()
@@ -51,7 +54,19 @@ void Update()
         {
             print("R pressed");
             NetworkedHealth = NetworkedHealth - 1;
-          
+            DealDamageRpc(userName);
+
         }
     }
+    
+    [Rpc(sources: RpcSources.All, targets: RpcTargets.All)]
+    public void DealDamageRpc(string playername)
+    {
+    
+    // The code inside here will run on the client which owns this object (has state and input authority).
+    Debug.Log("Received DealDamageRpc on StateAuthority, modifying Networked variable");
+        userName = playername;
+        playerName.text = playername;
+    }
+    
 }
