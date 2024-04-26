@@ -24,6 +24,7 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     public List<SessionInfo> _session = new List<SessionInfo>();
     public GameObject _roomList;
 
+    public int myCharacter;
     private void Awake()
     {
         if(instance==null) { instance = this; }
@@ -35,6 +36,10 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
       //  ConnectToLobby("Usman");
     }
 
+    public void SelectCharacter(int characterId)
+    {
+        myCharacter=characterId;
+    }
     public void SetPlayerName()
     {
      StartCoroutine ( ConnectToLobby(userInputField.text));
@@ -54,6 +59,15 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     }
 
   
+    void Update()
+    {
+       if (runner!=null)
+        {
+           print(runner.IsCloudReady);
+        }
+    }
+
+
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
     {
         print("session list updated");
@@ -132,9 +146,10 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     }
     public void OnConnectedToServer(NetworkRunner runner)
     {
+        print("connected to server");
     //    throw new NotImplementedException();
     }
-
+    
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
     {
        // throw new NotImplementedException();
@@ -152,8 +167,12 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
+        Debug.Log(reason.ToString());
+      
+       
       //  throw new NotImplementedException();
     }
+
 
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
     {
@@ -169,7 +188,7 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     {
       //  throw new NotImplementedException();
     }
-
+    
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
     {
        // throw new NotImplementedException();
