@@ -7,6 +7,7 @@ using TMPro;
 using StarterAssets;
 using UnityEngine.InputSystem;
 using UnityEngine.Animations;
+using UnityEngine.UI;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -15,11 +16,16 @@ public class PlayerController : NetworkBehaviour
     public TMP_Text playerName;
     public GameObject PrefabPika;
     public GameObject canvasData;
+    public Button AttackButton;
     public GameObject[] characters;
     [Networked]
     public string userName { get; set; } =" ";
     [Networked]
     public int myCharacterindex { get; set; } = 0;
+
+    [Networked, OnChangedRender(nameof(HealthChanged))]
+    public int myHealth { get; set; } = 100;
+
     IEnumerator Start()
     {
         canvasData.GetComponent<LookAtConstraint>().rotationOffset = new Vector3(-180, 0, 180);
@@ -27,10 +33,12 @@ public class PlayerController : NetworkBehaviour
         sc.weight = 1.0f;
         sc.sourceTransform = Camera.main.transform;
         canvasData.GetComponent<LookAtConstraint>().SetSource(0, sc);
+        HealthChanged();
+        AttackButton.onClick.AddListener(DealDamageRpc);
 
         if (HasStateAuthority == false)
         {
-            yield return new WaitForSeconds(3);
+            yield return new WaitForSeconds(2);
             playerName.text = userName;
             GameObject myPlayerAvatar = Instantiate(characters[myCharacterindex], gameObject.transform);
             GetComponent<Animator>().avatar = myPlayerAvatar.GetComponent<Animator>().avatar;
@@ -49,7 +57,28 @@ public class PlayerController : NetworkBehaviour
             userName = GameManager.instance._playerName;
             //  DealDamageRpc(userName);
         }
+        canvasData.SetActive(true);
     }
+
+    void HealthChanged()
+    {
+
+
+        AttackButton.transform.GetChild(0).gameObject.GetComponent<TMP_Text>().text= myHealth.ToString();
+
+        //   Debug.Log($"Health changed to: {NetworkedHealth}");
+    }
+
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void DealDamageRpc()
+    {
+        // The code inside here will run on the client which owns this object (has state and input authority).
+        Debug.Log("Received DealDamageRpc on StateAuthority, modifying Networked variable");
+        myHealth = myHealth - 1;//  damage;
+    }
+
+
     IEnumerator SpawnTest()
     {
        yield return new WaitForSeconds(10);

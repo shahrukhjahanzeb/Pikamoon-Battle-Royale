@@ -6583,7 +6583,7 @@ namespace Fusion.Editor {
           nameof(GetDrawerTypeForType),
           BindingFlags.Static | BindingFlags.NonPublic);
 #else
-      private delegate Type LegacyGetDrawerTypeForTypeDelegate(Type type);
+      private delegate Type LegacyGetDrawerTypeForTypeDelegate(Type type,bool isPropertyTypeAManagedReference=false);
       private static readonly LegacyGetDrawerTypeForTypeDelegate LegacyGetDrawerTypeForType =
         CreateEditorMethodDelegate<LegacyGetDrawerTypeForTypeDelegate>(
           "UnityEditor.ScriptAttributeUtility",

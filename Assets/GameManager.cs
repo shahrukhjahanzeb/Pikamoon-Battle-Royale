@@ -6,6 +6,8 @@ using Fusion.Sockets;
 using System;
 using UnityEngine.UI;
 using TMPro;
+using UnityEditor;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -18,22 +20,35 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     public TMP_Text userInputField;
     [Header("Session list")]
    
-    public Button refreshButton;
+    public Button createSessionButton;
     public Transform sessionListContent;
     public GameObject sessionEntryPrefab;
     public List<SessionInfo> _session = new List<SessionInfo>();
     public GameObject _roomList;
-
+  //  public SceneAsset lobbyScene;
+  //  public SceneAsset gamePlayScene;
     public int myCharacter;
     private void Awake()
     {
         if(instance==null) { instance = this; }
-    
+    DontDestroyOnLoad(gameObject);
     }
     void Start()
     {
       
       //  ConnectToLobby("Usman");
+    }
+
+    public void ReturnToLobby()
+    {
+        runner.Despawn(runner.GetPlayerObject(runner.LocalPlayer));
+        runner.Shutdown(true,ShutdownReason.Ok);
+    }
+
+    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+    {
+        SceneManager.LoadScene("Lobby");
+        //    throw new NotImplementedException();
     }
 
     public void SelectCharacter(int characterId)
@@ -63,7 +78,14 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     {
        if (runner!=null)
         {
-           print(runner.IsCloudReady);
+            if(runner.IsCloudReady && !runner.IsConnectedToServer) {
+                createSessionButton.interactable = true;
+            }
+            else
+                createSessionButton.interactable = false;
+
+            //  print(runner.IsCloudReady);
+           
         }
     }
 
@@ -81,7 +103,8 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     }
     public void RefreshSessionListUI()
     {
-
+      //  if (sessionListContent == null)
+      //      return;
         //Create Session list UI so we dont create duplicates
         foreach(Transform child in sessionListContent)
         {
@@ -120,10 +143,10 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
 
         await runner.StartGame(new StartGameArgs()
         {
+            Scene = SceneRef.FromIndex(1),  //runner.LoadScene(SceneRef.FromIndex(1),LoadSceneMode.Additive),// SceneManager.LoadScene("GamePlay").,
             GameMode = GameMode.Shared,
-           
             SessionName = sessionName,
-  
+
         }) ;
     }
     public async void CreateSession()
@@ -139,6 +162,7 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
 
         await runner.StartGame(new StartGameArgs()
         {
+            Scene = SceneRef.FromIndex(1),
             GameMode = GameMode.Shared,
             SessionName = randomSessionName,
             PlayerCount = 4,
@@ -168,6 +192,7 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
         Debug.Log(reason.ToString());
+      
       
        
       //  throw new NotImplementedException();
@@ -204,8 +229,9 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
         print("Onplayer Joinned");
         if (player == runner.LocalPlayer)
         {
-           
-          runner.Spawn(PlayerPrefab, new Vector3(0, 0, 0), Quaternion.identity, player);
+       //     SceneManager.LoadScene(gamePlayScene.name);
+         NetworkObject playerNetworkObject= runner.Spawn(PlayerPrefab, new Vector3(0, 0, 0), Quaternion.identity, player);
+            runner.SetPlayerObject(player,playerNetworkObject);
          }
       //  throw new NotImplementedException();
     }
@@ -237,10 +263,7 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
 
    
 
-    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
-    {
-    //    throw new NotImplementedException();
-    }
+    
 
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)
     {
