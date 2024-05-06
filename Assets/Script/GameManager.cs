@@ -11,6 +11,7 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
 {
+
     public static GameManager instance;
    // public bool connectOnAwake = false;
     public NetworkRunner runner;
@@ -38,18 +39,23 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     }
     void Start()
     {
-      
-      //  ConnectToLobby("Usman");
+
     }
+
+    
 
     public void ReturnToLobby()
     {
         runner.Despawn(runner.GetPlayerObject(runner.LocalPlayer));
         runner.Shutdown(true,ShutdownReason.Ok);
+       
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
+
+       
+      
         SceneManager.LoadScene("Lobby");
         //    throw new NotImplementedException();
     }
@@ -104,22 +110,16 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
     {
         print("session list updated");
         _session.Clear();
         _session = sessionList;
 
-      
-
-
-
     }
     public void RefreshSessionListUI()
     {
-      //  if (sessionListContent == null)
-      //      return;
+      
         //Create Session list UI so we dont create duplicates
         foreach(Transform child in sessionListContent)
         {
@@ -175,12 +175,15 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
             runner = gameObject.AddComponent<NetworkRunner>();
         }
 
+        
         await runner.StartGame(new StartGameArgs()
         {
             Scene = SceneRef.FromIndex(1),
             GameMode = GameMode.Shared,
             SessionName = randomSessionName,
             PlayerCount = 4,
+            
+            
         });
     }
     public void OnConnectedToServer(NetworkRunner runner)
@@ -250,13 +253,20 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
        //     SceneManager.LoadScene(gamePlayScene.name);
          NetworkObject playerNetworkObject= runner.Spawn(PlayerPrefab, new Vector3(0, 0, 0), Quaternion.identity, player);
             runner.SetPlayerObject(player,playerNetworkObject);
+           //print( player. .GetComponent<PlayerController>().myHealth);
          }
       //  throw new NotImplementedException();
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-     //   throw new NotImplementedException();
+        print("Player left guys");
+        if (player == runner.LocalPlayer)
+        {
+            
+        }
+       
+    //   throw new NotImplementedException();
     }
 
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress)
@@ -285,6 +295,8 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)
     {
+
+    //    print("Player left guys");
       //  throw new NotImplementedException();
     }
 

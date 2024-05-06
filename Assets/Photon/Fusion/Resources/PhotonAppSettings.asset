@@ -28,4 +28,4 @@ MonoBehaviour:
     EnableLobbyStatistics: 1
     NetworkLogging: 1
     encryptionMode: 0
-    emptyRoomTtl: 0
+    emptyRoomTtl: 60000
