@@ -19,8 +19,11 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public TMP_Text userInputField;
     [Header("Session list")]
-   
+
+    public Transform _canvasCharacterSelection;
     public Button createSessionButton;
+    public Button reconnectSessionButton;
+    public TMP_Text connectionStatus;
     public Transform sessionListContent;
     public GameObject sessionEntryPrefab;
     public List<SessionInfo> _session = new List<SessionInfo>();
@@ -54,6 +57,18 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     public void SelectCharacter(int characterId)
     {
         myCharacter=characterId;
+        for(int i=0;i<_canvasCharacterSelection.childCount;i++)
+        {
+            if(characterId!=i)
+            {
+
+                _canvasCharacterSelection.GetChild(i).GetChild(0).gameObject.GetComponent<Outline>().enabled = false;
+
+            }
+            else
+                _canvasCharacterSelection.GetChild(i).GetChild(0).gameObject.GetComponent<Outline>().enabled = true;
+        }
+      //  _canvasCharacterSelection.GetChild(characterId)
     }
     public void SetPlayerName()
     {
@@ -171,12 +186,14 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnConnectedToServer(NetworkRunner runner)
     {
         print("connected to server");
+        connectionStatus.text = "Connected to Server";
     //    throw new NotImplementedException();
     }
     
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
     {
-       // throw new NotImplementedException();
+        connectionStatus.text = "NetWork connection Failed : reason: "+ reason.ToString();
+        // throw new NotImplementedException();
     }
 
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token)
@@ -192,10 +209,11 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
         Debug.Log(reason.ToString());
-      
-      
-       
-      //  throw new NotImplementedException();
+        connectionStatus.text = "Network Disconnected reason: " + reason.ToString();
+
+
+
+        //  throw new NotImplementedException();
     }
 
 

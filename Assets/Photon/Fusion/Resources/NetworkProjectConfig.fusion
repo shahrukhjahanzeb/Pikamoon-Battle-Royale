@@ -14,19 +14,19 @@
     "HideNetworkObjectInactivityGuard": false,
     "Simulation": {
         "InputDataWordCount": 0,
-        "ReplicationFeatures": 1,
+        "ReplicationFeatures": 0,
         "InputTransferMode": 0,
         "PlayerCount": 10,
         "TickRateSelection": {
             "Client": 64,
             "ServerIndex": 0,
-            "ClientSendIndex": 1,
-            "ServerSendIndex": 1
+            "ClientSendIndex": 0,
+            "ServerSendIndex": 0
         }
     },
     "Network": {
-        "ConnectionTimeout": 10.0,
-        "ConnectionShutdownTime": 10.0,
+        "ConnectionTimeout": 30.0,
+        "ConnectionShutdownTime": 30.0,
         "ReliableDataTransferModes": 3
     },
     "HostMigration": {
@@ -37,7 +37,7 @@
         "EnableEncryption": false
     },
     "NetworkConditions": {
-        "Enabled": false,
+        "Enabled": true,
         "DelayShape": 0,
         "DelayMin": 0.15,
         "DelayMax": 0.15,
