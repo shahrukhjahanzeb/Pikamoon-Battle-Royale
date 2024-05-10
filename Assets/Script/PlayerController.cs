@@ -16,10 +16,11 @@ public class PlayerController : NetworkBehaviour
     public TMP_Text playerName;
     public GameObject PrefabPika;
     public GameObject canvasData;
-    public Button AttackButton;
+    public Button AttackButton,destroypika,spawnPika;
     public GameObject[] characters;
+    public NetworkObject myPikamoon;
     [Networked]
-    public string userName { get; set; } =" ";
+    public string userName { get; set; } = " ";
     [Networked]
     public int myCharacterindex { get; set; } = 0;
 
@@ -35,6 +36,7 @@ public class PlayerController : NetworkBehaviour
         canvasData.GetComponent<LookAtConstraint>().SetSource(0, sc);
         HealthChanged();
         AttackButton.onClick.AddListener(DealDamageRpc);
+        
 
         if (HasStateAuthority == false)
         {
@@ -55,18 +57,35 @@ public class PlayerController : NetworkBehaviour
             GetComponent<ThirdPersonController>().enabled = true;
             GetComponent<PlayerInput>().enabled = true;
             userName = GameManager.instance._playerName;
-            //  DealDamageRpc(userName);
+         //   StartCoroutine(SpawnTest());// userName);
+            spawnPika.onClick.AddListener(SpawnPika);
+            destroypika.onClick.AddListener(DeSpawnPikamoon);
         }
         canvasData.SetActive(true);
+
+
     }
 
     void HealthChanged()
     {
 
 
-        AttackButton.transform.GetChild(0).gameObject.GetComponent<TMP_Text>().text= myHealth.ToString();
-
+        AttackButton.transform.GetChild(0).gameObject.GetComponent<TMP_Text>().text = myHealth.ToString();
+      
         //   Debug.Log($"Health changed to: {NetworkedHealth}");
+    }
+
+
+
+
+    //[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    void DeSpawnPikamoon()
+    {
+
+     //   yield return new WaitForSeconds(5f);
+             Destroy(myPikamoon.gameObject);
+        // Update is called once per frame
+
     }
 
 
@@ -76,15 +95,21 @@ public class PlayerController : NetworkBehaviour
         // The code inside here will run on the client which owns this object (has state and input authority).
         Debug.Log("Received DealDamageRpc on StateAuthority, modifying Networked variable");
         myHealth = myHealth - 1;//  damage;
+       // StartCoroutine(DeSpawnPikamoon());
     }
 
 
-    IEnumerator SpawnTest()
+    void  SpawnPika()
     {
-       yield return new WaitForSeconds(10);
-            Runner.Spawn(PrefabPika, new Vector3(0, 0, 0), Quaternion.identity);
-        
+      //  yield return new WaitForSeconds(3);
+        myPikamoon = Runner.Spawn(PrefabPika, new Vector3(0, 0, 0), Quaternion.identity);
+        myPikamoon.GetComponent<FollowMyMaster>().followTarget = this.transform;
+
+        //yield return new WaitForSeconds(5);
+      //  DeSpawnPikamoon();
+
+
     }
-// Update is called once per frame
+    
 
 }
