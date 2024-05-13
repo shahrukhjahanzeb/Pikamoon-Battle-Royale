@@ -91,7 +91,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 46f311046d2104da8b56be3d0a49a119,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3692825204740483088}
+      addedObject: {fileID: 1654986533595331289}
   m_SourcePrefab: {fileID: 100100000, guid: 46f311046d2104da8b56be3d0a49a119, type: 3}
 --- !u!1 &2570491111593434576 stripped
 GameObject:
@@ -159,7 +159,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 7114810436584763612}
-  - {fileID: 3692825204740483088}
+  - {fileID: 1654986533595331289}
 --- !u!195 &-1879044967062047334
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -182,7 +182,7 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &3692825204740483088
+--- !u!114 &1654986533595331289
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -191,8 +191,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 2570491111593434576}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a355481710a628e4ca52997012141ff2, type: 3}
+  m_Script: {fileID: 11500000, guid: 62ddacec7a715744da6f19c1830f2350, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  followTarget: {fileID: 0}
+  followMaster: {fileID: 0}
   navMeshAgent: {fileID: -1879044967062047334}
+  ai_isEnabled: 0
+  movementThreshold: 1
+  disableThreshold: 5
+  resetDelayAI: 7
+  newCirclePositionMinDistance: 3
+  newCirclePositionMaxDistance: 5
