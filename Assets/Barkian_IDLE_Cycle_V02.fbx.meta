@@ -1,0 +1,793 @@
+fileFormatVersion: 2
+guid: 4096b95250ec73a4ea93e2b010316da8
+ModelImporter:
+  serializedVersion: 22200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: T_Barkian_D
+    second: {fileID: 2800000, guid: 6002a936b95bd2745b43d8e043a3a4f8, type: 3}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: "\nClip 'Take 001' has import animation warnings that
+      might lower retargeting quality:\nNote: Activate translation DOF on avatar
+      to improve retargeting quality.\n\t'barkian_rig_v004:Spine1_M' has translation
+      animation that will be discarded.\n\t'barkian_rig_v004:Spine1_M' has scale
+      animation that will be discarded.\n\t'barkian_rig_v004:Spine2_M' has translation
+      animation that will be discarded.\n\t'barkian_rig_v004:Spine2_M' has scale
+      animation that will be discarded.\n\t'barkian_rig_v004:Chest_M' has translation
+      animation that will be discarded.\n\t'barkian_rig_v004:Chest_M' has scale animation
+      that will be discarded.\n\t'barkian_rig_v004:Scapula_R' has translation animation
+      that will be discarded.\n\t'barkian_rig_v004:Neck_M' has translation animation
+      that will be discarded.\n\t'barkian_rig_v004:Scapula_L' has translation animation
+      that will be discarded.\n\t'barkian_rig_v004:Hip_R' has translation animation
+      that will be discarded.\n\t'barkian_rig_v004:Hip_L' has translation animation
+      that will be discarded.\n"
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 3
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human:
+    - boneName: barkian_rig_v004:Root_M
+      humanName: Hips
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Hip_L
+      humanName: LeftUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Hip_R
+      humanName: RightUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Knee_L
+      humanName: LeftLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Knee_R
+      humanName: RightLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Ankle_L
+      humanName: LeftFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Ankle_R
+      humanName: RightFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Spine1_M
+      humanName: Spine
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Spine2_M
+      humanName: Chest
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Neck_M
+      humanName: Neck
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Head_M
+      humanName: Head
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Scapula_L
+      humanName: LeftShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Scapula_R
+      humanName: RightShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Shoulder_L
+      humanName: LeftUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Shoulder_R
+      humanName: RightUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Elbow_L
+      humanName: LeftLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Elbow_R
+      humanName: RightLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Wrist_L
+      humanName: LeftHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Wrist_R
+      humanName: RightHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Toes_L
+      humanName: LeftToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Toes_R
+      humanName: RightToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Ear02_L
+      humanName: LeftEye
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Ear02_R
+      humanName: RightEye
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:ThumbFinger1_L
+      humanName: Left Thumb Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:ThumbFinger2_L
+      humanName: Left Thumb Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:ThumbFinger3_L
+      humanName: Left Thumb Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:IndexFinger1_L
+      humanName: Left Index Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:IndexFinger2_L
+      humanName: Left Index Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:MiddleFinger1_L
+      humanName: Left Middle Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:MiddleFinger2_L
+      humanName: Left Middle Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:RingFinger1_L
+      humanName: Left Ring Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:RingFinger2_L
+      humanName: Left Ring Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:ThumbFinger1_R
+      humanName: Right Thumb Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:ThumbFinger2_R
+      humanName: Right Thumb Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:ThumbFinger3_R
+      humanName: Right Thumb Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:IndexFinger1_R
+      humanName: Right Index Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:IndexFinger2_R
+      humanName: Right Index Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:MiddleFinger1_R
+      humanName: Right Middle Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:MiddleFinger2_R
+      humanName: Right Middle Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:RingFinger1_R
+      humanName: Right Ring Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:RingFinger2_R
+      humanName: Right Ring Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: barkian_rig_v004:Chest_M
+      humanName: UpperChest
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    skeleton:
+    - name: Barkian_IDLE_Cycle_V02(Clone)
+      parentName: 
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:Export_Gp
+      parentName: Barkian_IDLE_Cycle_V02(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:Barkian_Geo
+      parentName: barkian_rig_v004:Export_Gp
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:DeformationSystem
+      parentName: barkian_rig_v004:Export_Gp
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:Root_M
+      parentName: barkian_rig_v004:DeformationSystem
+      position: {x: 0.0009480808, y: 0.3644976, z: -0.009820705}
+      rotation: {x: -0.5, y: 0.5, z: 0.5, w: -0.5}
+      scale: {x: 1.0000001, y: 1, z: 1.0000004}
+    - name: barkian_rig_v004:StickT_R
+      parentName: barkian_rig_v004:Root_M
+      position: {x: -0.08979724, y: -0.43626675, z: 0.010593063}
+      rotation: {x: -0.0031894085, y: 0.9997097, z: -0.0046892334, w: -0.023417486}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:StickM_R
+      parentName: barkian_rig_v004:StickT_R
+      position: {x: -0.20225029, y: 0.34942523, z: 0.19786674}
+      rotation: {x: -0.3696861, y: -0.45165542, z: 0.6427188, w: 0.496238}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:StickE_R
+      parentName: barkian_rig_v004:StickM_R
+      position: {x: -0.23889694, y: -5.684342e-16, z: 5.684342e-16}
+      rotation: {x: 0.110883236, y: -0.77019995, z: 0.1454874, w: -0.6110078}
+      scale: {x: 1.0000001, y: 1.0000005, z: 1.0000002}
+    - name: barkian_rig_v004:Spine1_M
+      parentName: barkian_rig_v004:Root_M
+      position: {x: -0.060639977, y: -0.0000014940063, z: -0.000021936938}
+      rotation: {x: -0, y: -0, z: -0, w: -1}
+      scale: {x: 0.99962026, y: 0.99962044, z: 0.9996203}
+    - name: barkian_rig_v004:Spine2_M
+      parentName: barkian_rig_v004:Spine1_M
+      position: {x: -0.05650323, y: 0.0002704672, z: 0.0014463884}
+      rotation: {x: -0, y: -0, z: -0, w: -1}
+      scale: {x: 1.0235916, y: 1.0242813, z: 1.0252047}
+    - name: barkian_rig_v004:Chest_M
+      parentName: barkian_rig_v004:Spine2_M
+      position: {x: -0.048244596, y: 0.00045224093, z: 0.00095116463}
+      rotation: {x: -0, y: -0, z: -0, w: -1}
+      scale: {x: 1.0957134, y: 1.0985633, z: 1.1023854}
+    - name: barkian_rig_v004:Scapula_R
+      parentName: barkian_rig_v004:Chest_M
+      position: {x: -0.05364306, y: -0.041546326, z: -0.057471383}
+      rotation: {x: 0.000000002057952, y: 0.7071068, z: -0, w: -0.7071068}
+      scale: {x: 0.99999464, y: 1.0000004, z: 1.0000061}
+    - name: barkian_rig_v004:Shoulder_R
+      parentName: barkian_rig_v004:Scapula_R
+      position: {x: -0.053056486, y: -5.684342e-16, z: 3.5527135e-16}
+      rotation: {x: 8.0815027e-10, y: -0.00000005960463, z: -0.00000012724868, w: 1}
+      scale: {x: 0.9933688, y: 1.0000117, z: 1.0066705}
+    - name: barkian_rig_v004:Elbow_R
+      parentName: barkian_rig_v004:Shoulder_R
+      position: {x: -0.16951725, y: -2.0339285e-15, z: 5.684342e-16}
+      rotation: {x: -0.000000020179895, y: 0.0000000893365, z: -0.036910463, w: 0.9993186}
+      scale: {x: 0.9999697, y: 1.0000304, z: 0.99999994}
+    - name: barkian_rig_v004:ElbowPart1_R
+      parentName: barkian_rig_v004:Elbow_R
+      position: {x: -0.065933935, y: 1.6431301e-16, z: -2.842171e-16}
+      rotation: {x: -0, y: -0, z: 1.1781187e-16, w: 1}
+      scale: {x: 1.0000001, y: 1.0000001, z: 1}
+    - name: barkian_rig_v004:Wrist_R
+      parentName: barkian_rig_v004:ElbowPart1_R
+      position: {x: -0.065933935, y: 1.4210854e-16, z: -2.842171e-16}
+      rotation: {x: -0.00443451, y: -0.04622478, z: 0.050432034, w: 0.99764735}
+      scale: {x: 0.99930763, y: 1.0001137, z: 1.0005746}
+    - name: barkian_rig_v004:MiddleFinger1_R
+      parentName: barkian_rig_v004:Wrist_R
+      position: {x: -0.08437058, y: -1.824929e-16, z: 1.065814e-15}
+      rotation: {x: -0.021341735, y: -0.0729842, z: -0.00075464475, w: 0.9971044}
+      scale: {x: 1.0041579, y: 0.99999744, z: 0.9958593}
+    - name: barkian_rig_v004:MiddleFinger2_R
+      parentName: barkian_rig_v004:MiddleFinger1_R
+      position: {x: -0.058584835, y: 4.2188474e-17, z: 3.5527135e-16}
+      rotation: {x: 0.00031347197, y: -0.031533632, z: 0.000030315012, w: 0.99950266}
+      scale: {x: 1.0000757, y: 1.0000011, z: 0.99992526}
+    - name: barkian_rig_v004:MiddleFinger3_R
+      parentName: barkian_rig_v004:MiddleFinger2_R
+      position: {x: -0.043360606, y: 3.5527136e-17, z: -1.4210854e-15}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:ThumbFinger1_R
+      parentName: barkian_rig_v004:Wrist_R
+      position: {x: 0.002051472, y: 0.034530118, z: -0.034947533}
+      rotation: {x: -0.70256895, y: 0.24026835, z: -0.29338872, w: 0.6021554}
+      scale: {x: 0.9985574, y: 1.0005367, z: 1.0009089}
+    - name: barkian_rig_v004:ThumbFinger2_R
+      parentName: barkian_rig_v004:ThumbFinger1_R
+      position: {x: -0.038839474, y: -5.7731595e-16, z: 1.7763567e-16}
+      rotation: {x: -0, y: -0.0000000071013346, z: -0.000000010128133, w: 1}
+      scale: {x: 0.99999833, y: 1.0000005, z: 1.000003}
+    - name: barkian_rig_v004:ThumbFinger3_R
+      parentName: barkian_rig_v004:ThumbFinger2_R
+      position: {x: -0.03534543, y: -6.128431e-16, z: 8.126832e-16}
+      rotation: {x: 0.00000007450581, y: -0.039494473, z: 0.00000008940698, w: 0.99921983}
+      scale: {x: 0.997513, y: 0.99999976, z: 1.0024871}
+    - name: barkian_rig_v004:ThumbFinger4_R
+      parentName: barkian_rig_v004:ThumbFinger3_R
+      position: {x: -0.043461576, y: -7.105427e-17, z: -3.5527135e-16}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:RingFinger1_R
+      parentName: barkian_rig_v004:Wrist_R
+      position: {x: -0.07898427, y: -0.040584162, z: -0.0056964816}
+      rotation: {x: 0.17789467, y: -0.06339781, z: 0.022841519, w: 0.9817395}
+      scale: {x: 1.0024421, y: 1.0002229, z: 0.99733514}
+    - name: barkian_rig_v004:RingFinger2_R
+      parentName: barkian_rig_v004:RingFinger1_R
+      position: {x: -0.046425875, y: 5.7731595e-17, z: 1.1191048e-15}
+      rotation: {x: -0.0028330677, y: -0.03132719, z: -0.00022767292, w: 0.99950516}
+      scale: {x: 0.9948602, y: 0.99999344, z: 1.0051874}
+    - name: barkian_rig_v004:RingFinger3_R
+      parentName: barkian_rig_v004:RingFinger2_R
+      position: {x: -0.039330766, y: -1.7763567e-16, z: 2.842171e-16}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:IndexFinger1_R
+      parentName: barkian_rig_v004:Wrist_R
+      position: {x: -0.07722589, y: 0.041348558, z: -0.0107109565}
+      rotation: {x: -0.09309764, y: -0.073642835, z: -0.021390988, w: 0.9926993}
+      scale: {x: 1.0034522, y: 0.9999298, z: 0.99663246}
+    - name: barkian_rig_v004:IndexFinger2_R
+      parentName: barkian_rig_v004:IndexFinger1_R
+      position: {x: -0.054004133, y: 1.3544721e-16, z: -1.2656542e-15}
+      rotation: {x: -0.000058196478, y: -0.035348754, z: -0.000047462054, w: 0.9993751}
+      scale: {x: 1.0026633, y: 1.0000056, z: 0.9973267}
+    - name: barkian_rig_v004:IndexFinger3_R
+      parentName: barkian_rig_v004:IndexFinger2_R
+      position: {x: -0.040440053, y: -4.973799e-16, z: 4.2632563e-16}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:Neck_M
+      parentName: barkian_rig_v004:Chest_M
+      position: {x: -0.11731581, y: 0.0036098142, z: 1.04360964e-16}
+      rotation: {x: -0, y: -0, z: 0.023187041, w: -0.9997312}
+      scale: {x: 1.0000038, y: 0.9999971, z: 1.0000007}
+    - name: barkian_rig_v004:Head_M
+      parentName: barkian_rig_v004:Neck_M
+      position: {x: -0.10754482, y: -2.6645352e-17, z: 2.0206058e-16}
+      rotation: {x: -0.000000029802322, y: 0.000000029802322, z: -0.023254514, w: -0.99972963}
+      scale: {x: 0.999986, y: 1.0000323, z: 0.9999799}
+    - name: barkian_rig_v004:HeadEnd_M
+      parentName: barkian_rig_v004:Head_M
+      position: {x: -0.25588188, y: -6.6169293e-16, z: -1.1529277e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:Ear01_R
+      parentName: barkian_rig_v004:Head_M
+      position: {x: -0.021747403, y: -0.009635914, z: -0.11170018}
+      rotation: {x: 0.5349437, y: 0.4857909, z: 0.24424383, w: -0.6466742}
+      scale: {x: 1.000225, y: 0.9998296, z: 0.9999451}
+    - name: barkian_rig_v004:Ear02_R
+      parentName: barkian_rig_v004:Ear01_R
+      position: {x: -0.039895236, y: -1.4210854e-16, z: 1.0658141e-16}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000001, y: 1.0000002, z: 1.0000001}
+    - name: barkian_rig_v004:Ear03_R
+      parentName: barkian_rig_v004:Ear02_R
+      position: {x: -0.04895344, y: -4.2632563e-16, z: -1.7763567e-16}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:Ear01_L
+      parentName: barkian_rig_v004:Head_M
+      position: {x: -0.021747403, y: -0.009635914, z: 0.11170018}
+      rotation: {x: -0.485791, y: 0.5349435, z: -0.6466742, w: -0.24424392}
+      scale: {x: 1.0000019, y: 1.0000085, z: 0.99998957}
+    - name: barkian_rig_v004:Ear02_L
+      parentName: barkian_rig_v004:Ear01_L
+      position: {x: 0.039895236, y: 7.105427e-17, z: -7.105427e-17}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 0.99999976, y: 1, z: 1.0000001}
+    - name: barkian_rig_v004:Ear03_L
+      parentName: barkian_rig_v004:Ear02_L
+      position: {x: 0.04895344, y: 5.684342e-16, z: 2.842171e-16}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:Scapula_L
+      parentName: barkian_rig_v004:Chest_M
+      position: {x: -0.05585589, y: -0.04192603, z: 0.05741246}
+      rotation: {x: 0.7071068, y: 0.000000060633624, z: 0.7071068, w: -0.00000005960465}
+      scale: {x: 0.9999989, y: 0.99999976, z: 1.0000011}
+    - name: barkian_rig_v004:Shoulder_L
+      parentName: barkian_rig_v004:Scapula_L
+      position: {x: 0.053056486, y: -5.869385e-11, z: -4.973799e-16}
+      rotation: {x: 6.776262e-17, y: -0.000000023283079, z: -0.00000012132656, w: 1}
+      scale: {x: 0.99327797, y: 1.000024, z: 1.0067494}
+    - name: barkian_rig_v004:Elbow_L
+      parentName: barkian_rig_v004:Shoulder_L
+      position: {x: 0.16951725, y: 1.4477308e-15, z: -0.00000001481967}
+      rotation: {x: 0.0000000066124386, y: -0.00000012880426, z: -0.03599852, w: 0.99935186}
+      scale: {x: 1.0000005, y: 1.0000005, z: 1.0000002}
+    - name: barkian_rig_v004:ElbowPart1_L
+      parentName: barkian_rig_v004:Elbow_L
+      position: {x: 0.065933935, y: -9.769963e-16, z: -0.0000000055514398}
+      rotation: {x: 0.0000000030359881, y: -0.000000022144597, z: 2.5825336e-17, w: 1}
+      scale: {x: 1.0000005, y: 1.0000004, z: 1}
+    - name: barkian_rig_v004:Wrist_L
+      parentName: barkian_rig_v004:ElbowPart1_L
+      position: {x: 0.065933935, y: -9.903189e-16, z: -0.0000000055514398}
+      rotation: {x: 0.0044345064, y: 0.04622481, z: -0.05043204, w: -0.9976474}
+      scale: {x: 0.9998752, y: 1.0001235, z: 1.0000006}
+    - name: barkian_rig_v004:MiddleFinger1_L
+      parentName: barkian_rig_v004:Wrist_L
+      position: {x: 0.08437058, y: 2.137148e-10, z: -0.0000000072662822}
+      rotation: {x: -0.0213417, y: -0.07321276, z: -0.0007575483, w: 0.9970878}
+      scale: {x: 1.0053154, y: 1.0000031, z: 0.9946974}
+    - name: barkian_rig_v004:MiddleFinger2_L
+      parentName: barkian_rig_v004:MiddleFinger1_L
+      position: {x: 0.058584835, y: 7.57052e-10, z: -0.000000005021987}
+      rotation: {x: 0.0003116148, y: -0.03223361, z: 0.000026768526, w: 0.99948037}
+      scale: {x: 0.9949163, y: 1.0000054, z: 1.0050986}
+    - name: barkian_rig_v004:MiddleFinger3_L
+      parentName: barkian_rig_v004:MiddleFinger2_L
+      position: {x: 0.043360606, y: 7.2588435e-10, z: -0.0000000037172514}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:IndexFinger1_L
+      parentName: barkian_rig_v004:Wrist_L
+      position: {x: 0.07722589, y: -0.041348558, z: 0.010710951}
+      rotation: {x: -0.09309482, y: -0.07381827, z: -0.021431597, w: 0.9926858}
+      scale: {x: 1.0056401, y: 1.0000123, z: 0.99437004}
+    - name: barkian_rig_v004:IndexFinger2_L
+      parentName: barkian_rig_v004:IndexFinger1_L
+      position: {x: 0.054004133, y: 0.000000001316972, z: -0.000000004419228}
+      rotation: {x: -0.000065490574, y: -0.03622097, z: -0.000060313352, w: 0.9993438}
+      scale: {x: 0.9935531, y: 0.999998, z: 1.0064852}
+    - name: barkian_rig_v004:IndexFinger3_L
+      parentName: barkian_rig_v004:IndexFinger2_L
+      position: {x: 0.040440053, y: 0.0000000011838621, z: -0.0000000033083125}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:ThumbFinger1_L
+      parentName: barkian_rig_v004:Wrist_L
+      position: {x: -0.002051469, y: -0.034530118, z: 0.034947533}
+      rotation: {x: -0.7026178, y: 0.24020033, z: -0.2935665, w: 0.6020389}
+      scale: {x: 0.99954313, y: 1.0009661, z: 0.99948907}
+    - name: barkian_rig_v004:ThumbFinger2_L
+      parentName: barkian_rig_v004:ThumbFinger1_L
+      position: {x: 0.038839474, y: 0.0000000019469597, z: 0.0000000021568127}
+      rotation: {x: 0.000000074505806, y: -0, z: -0.000000029802322, w: 1}
+      scale: {x: 0.99780434, y: 0.9999997, z: 1.0021998}
+    - name: barkian_rig_v004:ThumbFinger3_L
+      parentName: barkian_rig_v004:ThumbFinger2_L
+      position: {x: 0.03534543, y: 0.0000000017718094, z: 0.0000000019627828}
+      rotation: {x: 0.000000016136319, y: -0.039494455, z: 0.00000012212861, w: 0.99921983}
+      scale: {x: 1.0014881, y: 1, z: 0.9985153}
+    - name: barkian_rig_v004:ThumbFinger4_L
+      parentName: barkian_rig_v004:ThumbFinger3_L
+      position: {x: 0.043461576, y: 0.0000000023270288, z: 0.0000000024134847}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:RingFinger1_L
+      parentName: barkian_rig_v004:Wrist_L
+      position: {x: 0.07898427, y: 0.040584162, z: 0.005696474}
+      rotation: {x: -0.17788374, y: 0.06365557, z: -0.022910826, w: -0.98172325}
+      scale: {x: 1.0032872, y: 1.0004671, z: 0.9962495}
+    - name: barkian_rig_v004:RingFinger2_L
+      parentName: barkian_rig_v004:RingFinger1_L
+      position: {x: 0.046425875, y: -0.0000000010649301, z: -0.0000000039164774}
+      rotation: {x: -0.0028143213, y: -0.031922568, z: -0.0001988503, w: 0.99948645}
+      scale: {x: 0.99341893, y: 0.9999976, z: 1.0066353}
+    - name: barkian_rig_v004:RingFinger3_L
+      parentName: barkian_rig_v004:RingFinger2_L
+      position: {x: 0.039330766, y: -7.810573e-10, z: -0.0000000033222862}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:Hip_R
+      parentName: barkian_rig_v004:Root_M
+      position: {x: 0.038744807, y: -0.0004901834, z: -0.06772773}
+      rotation: {x: -0.0019425006, y: -0.9999781, z: -0.00001230836, w: 0.0063291197}
+      scale: {x: 1.0000001, y: 1.0000002, z: 0.9999998}
+    - name: barkian_rig_v004:Knee_R
+      parentName: barkian_rig_v004:Hip_R
+      position: {x: -0.14301558, y: -1.7985613e-16, z: 1.4210854e-16}
+      rotation: {x: 0.00000003843979, y: 0.00000006891786, z: 0.116717935, w: 0.9931651}
+      scale: {x: 1.0000004, y: 1.0000004, z: 0.9999999}
+    - name: barkian_rig_v004:Ankle_R
+      parentName: barkian_rig_v004:Knee_R
+      position: {x: -0.14277549, y: -3.330669e-17, z: -9.752199e-15}
+      rotation: {x: 0.0011580978, y: -0.0065125804, z: -0.11863253, w: 0.99291617}
+      scale: {x: 1.0000002, y: 1.0000005, z: 1.0000002}
+    - name: barkian_rig_v004:Toes_R
+      parentName: barkian_rig_v004:Ankle_R
+      position: {x: -0.017634371, y: 0.058052734, z: 2.3327117e-13}
+      rotation: {x: -0.0057804585, y: 0.00321576, z: -0.6948298, w: 0.7191438}
+      scale: {x: 0.99999905, y: 0.99999934, z: 0.99999976}
+    - name: barkian_rig_v004:ToesEnd_R
+      parentName: barkian_rig_v004:Toes_R
+      position: {x: -0.023253597, y: -0.02120471, z: 0.0007165314}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: barkian_rig_v004:Hip_L
+      parentName: barkian_rig_v004:Root_M
+      position: {x: 0.03522383, y: -0.0004901834, z: 0.069623895}
+      rotation: {x: 0.9999781, y: -0.0019425005, z: 0.006329134, w: 0.000012308359}
+      scale: {x: 1.0000002, y: 1, z: 1.0000001}
+    - name: barkian_rig_v004:Knee_L
+      parentName: barkian_rig_v004:Hip_L
+      position: {x: 0.14301558, y: 1.7208456e-16, z: -2.3092638e-16}
+      rotation: {x: -0, y: 0.000000059604645, z: 0.116717845, w: 0.99316514}
+      scale: {x: 1, y: 1.0000001, z: 1}
+    - name: barkian_rig_v004:Ankle_L
+      parentName: barkian_rig_v004:Knee_L
+      position: {x: 0.14277549, y: 1.8490763e-15, z: 9.7077896e-15}
+      rotation: {x: 0.0011581181, y: -0.0065125218, z: -0.11863257, w: 0.99291617}
+      scale: {x: 1.0000002, y: 1.0000001, z: 1}
+    - name: barkian_rig_v004:Toes_L
+      parentName: barkian_rig_v004:Ankle_L
+      position: {x: 0.017634371, y: -0.058052734, z: -2.3340441e-13}
+      rotation: {x: 0.005780366, y: -0.0032157954, z: 0.6948298, w: -0.7191438}
+      scale: {x: 1.0000001, y: 1, z: 0.99999994}
+    - name: barkian_rig_v004:ToesEnd_L
+      parentName: barkian_rig_v004:Toes_L
+      position: {x: 0.023253597, y: 0.02120471, z: -0.0007165314}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 3
+  humanoidOversampling: 1
+  avatarSetup: 1
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

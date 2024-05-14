@@ -104,12 +104,7 @@ public class PlayerController : NetworkBehaviour
       //  yield return new WaitForSeconds(3);
         myPikamoon = Runner.Spawn(PrefabPika, new Vector3(0, 0, 0), Quaternion.identity);
         myPikamoon.GetComponent<PikaMoonMovements>().followMaster = this.transform;
-
         //yield return new WaitForSeconds(5);
       //  DeSpawnPikamoon();
-
-
     }
-    
-
 }
