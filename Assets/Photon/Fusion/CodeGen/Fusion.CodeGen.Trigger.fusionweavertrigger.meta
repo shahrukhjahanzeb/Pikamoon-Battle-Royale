@@ -8,3 +8,4 @@ ScriptedImporter:
   assetBundleName: 
   assetBundleVariant: 
   script: {instanceID: 0}
+  RunWeaverOnConfigChanges: 1

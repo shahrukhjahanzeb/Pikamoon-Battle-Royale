@@ -4470,7 +4470,7 @@ namespace Fusion.Editor {
     }
     
     public static System.Type GetDrawerTypeIncludingWorkarounds(System.Attribute attribute) {
-      var drawerType = UnityInternal.ScriptAttributeUtility.GetDrawerTypeForType(attribute.GetType(), null, false);
+      var drawerType = UnityInternal.ScriptAttributeUtility.GetDrawerTypeForType(attribute.GetType(), false);
       if (drawerType == null) {
         return null;
       }
@@ -4487,6 +4487,9 @@ namespace Fusion.Editor {
 
       foreach (var baseType in baseTypes) {
         types.AddRange(TypeCache.GetTypesDerivedFrom(baseType).Where(filter));
+        if (filter(baseType)) {
+          types.Add(baseType);
+        }
       }
 
       if (baseTypes.Length > 1) {
@@ -5440,10 +5443,16 @@ namespace Fusion.Editor {
         throw new InvalidOperationException(CreateMethodExceptionMessage(assembly, typeName, methodName, flags, delegateType), ex);
       }
     }
-
-    public static T CreateMethodDelegate<T>(this Type type, string methodName, BindingFlags flags, Type delegateType, params DelegateSwizzle[] fallbackSwizzles) where T : Delegate {
+    
+    internal static T CreateMethodDelegate<T>(this Type type, string methodName, BindingFlags flags, Type delegateType, params DelegateSwizzle[] fallbackSwizzles) where T : Delegate {
       try {
+        delegateType ??= typeof(T);
+        
+        
         var method = GetMethodOrThrow(type, methodName, flags, delegateType, fallbackSwizzles, out var swizzle);
+        if (swizzle == null && typeof(T) == delegateType) {
+          return (T)Delegate.CreateDelegate(typeof(T), method);
+        }
 
         var delegateParameters = typeof(T).GetMethod("Invoke").GetParameters();
         var parameters         = new List<ParameterExpression>();
@@ -5460,13 +5469,13 @@ namespace Fusion.Editor {
               convertedParameters.Add(Expression.Convert(parameters[j], methodParameters[i].ParameterType));
             }
           } else {
-            var swizzledParameters = swizzle.Swizzle(parameters.ToArray());
-            for (int i = 0, j = method.IsStatic ? 0 : 1; i < methodParameters.Length; ++i, ++j) {
-              convertedParameters.Add(Expression.Convert(swizzledParameters[j], methodParameters[i].ParameterType));
+            foreach (var converter in swizzle.Converters) {
+              convertedParameters.Add(Expression.Invoke(converter, parameters));
             }
           }
         }
-
+        
+        
         MethodCallExpression callExpression;
         if (method.IsStatic) {
           callExpression = Expression.Call(method, convertedParameters);
@@ -5482,42 +5491,7 @@ namespace Fusion.Editor {
         throw new InvalidOperationException(CreateMethodExceptionMessage<T>(type.Assembly, type.FullName, methodName, flags), ex);
       }
     }
-
-    public static T CreateConstructorDelegate<T>(this Type type, BindingFlags flags, Type delegateType, params DelegateSwizzle[] fallbackSwizzles) where T : Delegate {
-      try {
-        var constructor = GetConstructorOrThrow(type, flags, delegateType, fallbackSwizzles, out var swizzle);
-
-        var delegateParameters = typeof(T).GetMethod("Invoke").GetParameters();
-        var parameters         = new List<ParameterExpression>();
-
-        for (var i = 0; i < delegateParameters.Length; ++i) {
-          parameters.Add(Expression.Parameter(delegateParameters[i].ParameterType, $"param_{i}"));
-        }
-
-        var convertedParameters = new List<Expression>();
-        {
-          var constructorParameters = constructor.GetParameters();
-          if (swizzle == null) {
-            for (int i = 0, j = 0; i < constructorParameters.Length; ++i, ++j) {
-              convertedParameters.Add(Expression.Convert(parameters[j], constructorParameters[i].ParameterType));
-            }
-          } else {
-            var swizzledParameters = swizzle.Swizzle(parameters.ToArray());
-            for (int i = 0, j = 0; i < constructorParameters.Length; ++i, ++j) {
-              convertedParameters.Add(Expression.Convert(swizzledParameters[j], constructorParameters[i].ParameterType));
-            }
-          }
-        }
-
-        var newExpression = Expression.New(constructor, convertedParameters);
-        var l             = Expression.Lambda(typeof(T), newExpression, parameters);
-        var del           = l.Compile();
-        return (T)del;
-      } catch (Exception ex) {
-        throw new InvalidOperationException(CreateConstructorExceptionMessage(type.Assembly, type.FullName, flags), ex);
-      }
-    }
-
+    
     /// <summary>
     ///   Returns the first found member of the given name. Includes private members.
     /// </summary>
@@ -5779,7 +5753,7 @@ namespace Fusion.Editor {
 
       if (swizzles != null) {
         foreach (var swizzle in swizzles) {
-          var swizzled = swizzle.Swizzle(allDelegateParameters);
+          var swizzled = swizzle.Types;
           constructor = type.GetConstructor(flags, null, swizzled, null);
           if (constructor != null) {
             firstMatchingSwizzle = swizzle;
@@ -5809,7 +5783,7 @@ namespace Fusion.Editor {
 
       if (swizzles != null) {
         foreach (var swizzle in swizzles) {
-          var swizzled = swizzle.Swizzle(allDelegateParameters);
+          var swizzled = swizzle.Types;
           if (!flags.HasFlag(BindingFlags.Static) && swizzled[0] != type) {
             throw new InvalidOperationException();
           }
@@ -6000,29 +5974,33 @@ namespace Fusion.Editor {
       public Action<TValue> SetValue;
     }
 
-    public class DelegateSwizzle {
-      private readonly int[] _args;
-
-      public DelegateSwizzle(params int[] args) {
-        _args = args;
+    internal static class DelegateSwizzle<In0, In1> {
+      public static DelegateSwizzle Make<Out0>(Expression<Func<In0, In1, Out0>> out0) {
+        return new DelegateSwizzle(new Expression[] { out0 }, new [] { typeof(Out0)});
       }
-
-      public int Count => _args.Length;
-
-      public T[] Swizzle<T>(T[] inputTypes) {
-        var result = new T[_args.Length];
-
-        for (var i = 0; i < _args.Length; ++i) {
-          result[i] = inputTypes[_args[i]];
-        }
-
-        return result;
+      
+      public static DelegateSwizzle Make<Out0, Out1>(Expression<Func<In0, In1, Out0>> out0, Expression<Func<In0, In1, Out1>> out1) {
+        return new DelegateSwizzle(new Expression[] { out0, out1 }, new [] { typeof(Out0), typeof(Out1)});
+      }
+      
+      public static DelegateSwizzle Make<Out0, Out1, Out3>(Expression<Func<In0, In1, Out0>> out0, Expression<Func<In0, In1, Out1>> out1, Expression<Func<In0, In1, Out3>> out3) {
+        return new DelegateSwizzle(new Expression[] { out0, out1, out3 }, new [] { typeof(Out0), typeof(Out1), typeof(Out3)});
       }
     }
 
-#if UNITY_EDITOR
+    internal class DelegateSwizzle {
+      public DelegateSwizzle(Expression[] converters, Type[] types) {
+        Converters = converters;
+        Types = types;
+      }
 
-    public static T CreateEditorMethodDelegate<T>(string editorAssemblyTypeName, string methodName, BindingFlags flags = DefaultBindingFlags) where T : Delegate {
+      public Expression[] Converters { get; }
+      public Type[] Types { get; }
+    }
+
+#if UNITY_EDITOR
+    
+    public static T CreateEditorMethodDelegate<T>(string editorAssemblyTypeName, string methodName, BindingFlags flags) where T : Delegate {
       return CreateMethodDelegate<T>(typeof(Editor).Assembly, editorAssemblyTypeName, methodName, flags);
     }
 
@@ -6382,6 +6360,8 @@ namespace Fusion.Editor {
 
 #region UnityInternal.cs
 
+// ReSharper disable InconsistentNaming
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace Fusion.Editor {
   using System;
   using System.Collections;
@@ -6401,7 +6381,7 @@ namespace Fusion.Editor {
     
     [UnityEditor.InitializeOnLoad]
     public static class Event {
-      static StaticAccessor<UnityEngine.Event> s_Current_ = typeof(UnityEngine.Event).CreateStaticFieldAccessor<UnityEngine.Event>(nameof(s_Current));
+      static readonly StaticAccessor<UnityEngine.Event> s_Current_ = typeof(UnityEngine.Event).CreateStaticFieldAccessor<UnityEngine.Event>(nameof(s_Current));
       public static UnityEngine.Event s_Current => s_Current_.GetValue();
     }
     
@@ -6552,52 +6532,36 @@ namespace Fusion.Editor {
 
     [UnityEditor.InitializeOnLoad]
     public static class ScriptAttributeUtility {
-
-      public delegate List<PropertyAttribute> GetFieldAttributesDelegate(FieldInfo field);
-
-      public delegate FieldInfo GetFieldInfoFromPropertyDelegate(SerializedProperty property, out Type type);
-
+      
       public static readonly Type InternalType = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.ScriptAttributeUtility", true);
-
+      
+      public delegate FieldInfo GetFieldInfoFromPropertyDelegate(SerializedProperty property, out Type type);
       public static readonly GetFieldInfoFromPropertyDelegate GetFieldInfoFromProperty =
-        CreateEditorMethodDelegate<GetFieldInfoFromPropertyDelegate>(
-          "UnityEditor.ScriptAttributeUtility",
+        InternalType.CreateMethodDelegate<GetFieldInfoFromPropertyDelegate>(
           "GetFieldInfoFromProperty",
           BindingFlags.Static | BindingFlags.NonPublic);
-
-      public delegate Type GetDrawerTypeForPropertyAndTypeDelegate(SerializedProperty property, Type type);
-      public delegate Type GetDrawerTypeForTypeDelegate(Type type, Type[] renderPipelineTypes, bool isManagedReference);
       
-      
-      
-#if UNITY_2023_3_OR_NEWER
-      public static readonly GetDrawerTypeForPropertyAndTypeDelegate GetDrawerTypeForPropertyAndType =
-        CreateEditorMethodDelegate<GetDrawerTypeForPropertyAndTypeDelegate>(
-          "UnityEditor.ScriptAttributeUtility",
-          nameof(GetDrawerTypeForPropertyAndType),
-          BindingFlags.Static | BindingFlags.NonPublic);
-      
+      public delegate Type GetDrawerTypeForTypeDelegate(Type type, bool isManagedReference);
       public static readonly GetDrawerTypeForTypeDelegate GetDrawerTypeForType =
-        CreateEditorMethodDelegate<GetDrawerTypeForTypeDelegate>(
-          "UnityEditor.ScriptAttributeUtility",
-          nameof(GetDrawerTypeForType),
-          BindingFlags.Static | BindingFlags.NonPublic);
-#else
-      private delegate Type LegacyGetDrawerTypeForTypeDelegate(Type type,bool isPropertyTypeAManagedReference=false);
-      private static readonly LegacyGetDrawerTypeForTypeDelegate LegacyGetDrawerTypeForType =
-        CreateEditorMethodDelegate<LegacyGetDrawerTypeForTypeDelegate>(
-          "UnityEditor.ScriptAttributeUtility",
+        InternalType.CreateMethodDelegate<GetDrawerTypeForTypeDelegate>(
           "GetDrawerTypeForType",
-          BindingFlags.Static | BindingFlags.NonPublic);
+          BindingFlags.Static | BindingFlags.NonPublic,
+          null,
+          DelegateSwizzle<Type, bool>.Make((t, b) => t), // post 2023.3
+          DelegateSwizzle<Type, bool>.Make((t, b) => t, (t, b) => (Type[])null, (t, b) => b) // pre 2023.3.23
+        );
       
-      public static readonly GetDrawerTypeForPropertyAndTypeDelegate GetDrawerTypeForPropertyAndType = (_, type) => LegacyGetDrawerTypeForType(type);
-      public static readonly GetDrawerTypeForTypeDelegate GetDrawerTypeForType = (type, _, _) => LegacyGetDrawerTypeForType(type);
-#endif
+      public delegate Type GetDrawerTypeForPropertyAndTypeDelegate(SerializedProperty property, Type type);
+      public static readonly GetDrawerTypeForPropertyAndTypeDelegate GetDrawerTypeForPropertyAndType = 
+        InternalType.CreateMethodDelegate<GetDrawerTypeForPropertyAndTypeDelegate>(
+          "GetDrawerTypeForPropertyAndType",
+          BindingFlags.Static | BindingFlags.NonPublic);
 
       private static readonly GetHandlerDelegate _GetHandler = InternalType.CreateMethodDelegate<GetHandlerDelegate>("GetHandler", BindingFlags.NonPublic | BindingFlags.Static,
         MakeFuncType(typeof(SerializedProperty), PropertyHandler.InternalType)
       );
 
+      public delegate List<PropertyAttribute> GetFieldAttributesDelegate(FieldInfo field);
       public static readonly GetFieldAttributesDelegate GetFieldAttributes = InternalType.CreateMethodDelegate<GetFieldAttributesDelegate>(nameof(GetFieldAttributes));
 
       private static readonly StaticAccessor<object> _propertyHandlerCache = InternalType.CreateStaticPropertyAccessor(nameof(propertyHandlerCache), PropertyHandlerCache.InternalType);
@@ -6870,6 +6834,8 @@ namespace Fusion.Editor {
     public static InternalStyles Styles => InternalStyles.Instance;
   }
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+// ReSharper enable InconsistentNaming
 
 #endregion
 
@@ -6957,7 +6923,7 @@ namespace Fusion.Editor {
       All        = Predefined | InPackages | InAssets | Editor | Runtime,
     }
 
-    HashSet<string> _allAssemblies;
+    Dictionary<string, AssemblyInfo> _allAssemblies;
 
     protected override void OnGUIInternal(Rect position, SerializedProperty property, GUIContent label) {
       var  assemblyName = property.stringValue;
@@ -6965,12 +6931,18 @@ namespace Fusion.Editor {
       
       if (!string.IsNullOrEmpty(assemblyName)) {
         if (_allAssemblies == null) {
-          _allAssemblies = new HashSet<string>(GetAssemblies(AsmDefType.All), StringComparer.OrdinalIgnoreCase);
+          _allAssemblies = GetAssemblies(AsmDefType.All).ToDictionary(x => x.Name, x => x);
         }
 
-        if (!_allAssemblies.Contains(assemblyName, StringComparer.OrdinalIgnoreCase)) {
+        if (!_allAssemblies.TryGetValue(assemblyName, out var assemblyInfo)) {
           SetInfo($"Assembly not found: {assemblyName}");
           notFound = true;
+        } else if (((AssemblyNameAttribute)attribute).RequiresUnsafeCode && !assemblyInfo.AllowUnsafeCode) {
+          if (assemblyInfo.IsPredefined) {
+            SetError($"Predefined assemblies need 'Allow Unsafe Code' enabled in Player Settings");
+          } else {
+            SetError($"Assembly does not allow unsafe code");
+          }
         }
       }
 
@@ -7009,14 +6981,14 @@ namespace Fusion.Editor {
               menu.AddSeparator(prefix);
             }
 
-            foreach (var name in GetAssemblies(flag | AsmDefType.InPackages)) {
-              menu.AddItem(new GUIContent($"{prefix}Packages/{name}"), string.Equals(name, assemblyName, StringComparison.OrdinalIgnoreCase), onClicked, name);
+            foreach (var asm in GetAssemblies(flag | AsmDefType.InPackages)) {
+              menu.AddItem(new GUIContent($"{prefix}Packages/{asm.Name}"), string.Equals(asm.Name, assemblyName, StringComparison.OrdinalIgnoreCase), onClicked, asm.Name);
             }
 
             menu.AddSeparator(prefix);
 
-            foreach (var name in GetAssemblies(flag | AsmDefType.InAssets | AsmDefType.Predefined)) {
-              menu.AddItem(new GUIContent($"{prefix}{name}"), string.Equals(name, assemblyName, StringComparison.OrdinalIgnoreCase), onClicked, name);
+            foreach (var asm in GetAssemblies(flag | AsmDefType.InAssets | AsmDefType.Predefined)) {
+              menu.AddItem(new GUIContent($"{prefix}{asm.Name}"), string.Equals(asm.Name, assemblyName, StringComparison.OrdinalIgnoreCase), onClicked, asm.Name);
             }
           }
 
@@ -7031,61 +7003,68 @@ namespace Fusion.Editor {
       }
     }
 
-    static IEnumerable<string> GetAssemblies(AsmDefType types) {
-      IEnumerable<string> query = Enumerable.Empty<string>();
+    static IEnumerable<AssemblyInfo> GetAssemblies(AsmDefType types) {
+      var result = new Dictionary<string, AsmDefData>(StringComparer.OrdinalIgnoreCase);
 
       if (types.HasFlag(AsmDefType.Predefined)) {
         if (types.HasFlag(AsmDefType.Runtime)) {
-          query = query.Concat(new[] {
-            "Assembly-CSharp-firstpass",
-            "Assembly-CSharp"
-          });
+          yield return new AssemblyInfo("Assembly-CSharp-firstpass", PlayerSettings.allowUnsafeCode, true);
+          yield return new AssemblyInfo("Assembly-CSharp", PlayerSettings.allowUnsafeCode, true);
         }
 
         if (types.HasFlag(AsmDefType.Editor)) {
-          query = query.Concat(new[] {
-            "Assembly-CSharp-Editor-firstpass",
-            "Assembly-CSharp-Editor"
-          });
+          yield return new AssemblyInfo("Assembly-CSharp-Editor-firstpass", PlayerSettings.allowUnsafeCode, true);
+          yield return new AssemblyInfo("Assembly-CSharp-Editor", PlayerSettings.allowUnsafeCode, true);
         }
       }
 
       if (types.HasFlag(AsmDefType.InAssets) || types.HasFlag(AsmDefType.InPackages)) {
-        query = query.Concat(
-          AssetDatabase.FindAssets("t:asmdef")
-           .Select(x => AssetDatabase.GUIDToAssetPath(x))
-           .Where(x => {
-              if (types.HasFlag(AsmDefType.InAssets) && x.StartsWith("Assets/")) {
-                return true;
-              } else if (types.HasFlag(AsmDefType.InPackages) && x.StartsWith("Packages/")) {
-                return true;
-              } else {
-                return false;
-              }
-            })
-           .Select(x => JsonUtility.FromJson<AsmDefData>(File.ReadAllText(x)))
-           .Where(x => {
-              bool editorOnly = x.includePlatforms.Length == 1 && x.includePlatforms[0] == "Editor";
-              if (types.HasFlag(AsmDefType.Runtime) && !editorOnly) {
-                return true;
-              } else if (types.HasFlag(AsmDefType.Editor) && editorOnly) {
-                return true;
-              } else {
-                return false;
-              }
-            })
-           .Select(x => x.name)
-           .Distinct()
-        );
+        var query = AssetDatabase.FindAssets("t:asmdef")
+         .Select(x => AssetDatabase.GUIDToAssetPath(x))
+         .Where(x => {
+            if (types.HasFlag(AsmDefType.InAssets) && x.StartsWith("Assets/")) {
+              return true;
+            } else if (types.HasFlag(AsmDefType.InPackages) && x.StartsWith("Packages/")) {
+              return true;
+            } else {
+              return false;
+            }
+         })
+         .Select(x => JsonUtility.FromJson<AsmDefData>(File.ReadAllText(x)))
+         .Where(x => {
+           bool editorOnly = x.includePlatforms.Length == 1 && x.includePlatforms[0] == "Editor";
+           if (types.HasFlag(AsmDefType.Runtime) && !editorOnly) {
+             return true;
+           } else if (types.HasFlag(AsmDefType.Editor) && editorOnly) {
+             return true;
+           } else {
+             return false;
+           }
+         });
+        
+        foreach (var asmdef in query) {
+          yield return new AssemblyInfo(asmdef.name, asmdef.allowUnsafeCode, false);
+        }
       }
-
-      return query;
     }
 
     [Serializable]
     private class AsmDefData {
       public string[] includePlatforms = Array.Empty<string>();
       public string   name             = string.Empty;
+      public bool     allowUnsafeCode;
+    }
+    
+    private struct AssemblyInfo {
+      public string Name;
+      public bool   AllowUnsafeCode;
+      public bool   IsPredefined;
+      
+      public AssemblyInfo(string name, bool allowUnsafeCode, bool isPredefined) {
+        Name           = name;
+        AllowUnsafeCode = allowUnsafeCode;
+        IsPredefined   = isPredefined;
+      }
     }
   }
 }
@@ -7389,10 +7368,9 @@ namespace Fusion.Editor {
 
           FusionEditorLog.Assert(attributeDrawerType.IsSubclassOf(typeof(PropertyDrawer)));
 
-          if (fieldAttribute.Equals(attribute)) {
+          if (!foundSelf && fieldAttribute.Equals(attribute)) {
             // self
             PropertyDrawers.Add(this);
-            FusionEditorLog.Assert(foundSelf == false);
             foundSelf    = true;
             isLastDrawer = true;
             TraceField($"Found self at {i} ({this})");
@@ -10360,7 +10338,7 @@ namespace Fusion.Editor {
       }
 
       
-      var propertyDrawerType = UnityInternal.ScriptAttributeUtility.GetDrawerTypeForType(property.ValueEntry.TypeOfValue, null, false);
+      var propertyDrawerType = UnityInternal.ScriptAttributeUtility.GetDrawerTypeForType(property.ValueEntry.TypeOfValue, false);
 
       if (propertyDrawerType != null) {
         var meta = propertyDrawerType.GetCustomAttribute<FusionPropertyDrawerMetaAttribute>();
@@ -11379,10 +11357,15 @@ namespace Fusion.Editor {
     public const string DependencyName = "FusionILWeaverTriggerImporter/ConfigHash";
     public const string Extension = "." + ExtensionWithoutDot;
     public const string ExtensionWithoutDot = "fusionweavertrigger";
+    
+    [Tooltip("If enabled, runs the weaver when weaving-related changes are detected in the config file.")]
+    public bool RunWeaverOnConfigChanges = true;
 
     public override void OnImportAsset(AssetImportContext ctx) {
       ctx.DependsOnCustomDependency(DependencyName);
-      ILWeaverUtils.RunWeaver();
+      if (RunWeaverOnConfigChanges) {
+        ILWeaverUtils.RunWeaver();
+      }
     }
 
     private static void RefreshDependencyHash() {
@@ -12844,6 +12827,35 @@ namespace Fusion.Editor {
 }
 
 
+
+#endregion
+
+
+#region Assets/Photon/Fusion/Editor/Statistics/FusionStatisticsEditor.cs
+
+namespace Fusion.Statistics {
+  using UnityEngine;
+  using UnityEditor;
+  
+  [CustomEditor(typeof(FusionStatistics))]
+  public class FusionStatisticsEditor : Editor {
+    public override void OnInspectorGUI() {
+      FusionStatistics fusionStatistics = (FusionStatistics)target;
+      
+      EditorGUI.BeginChangeCheck();
+      DrawDefaultInspector();
+
+      if (EditorGUI.EndChangeCheck()) {
+        fusionStatistics.OnEditorChange();
+      }
+      
+      if (GUILayout.Button("Setup Statistics Panel"))
+      {
+        fusionStatistics.SetupStatisticsPanel();
+      }
+    }
+  }
+}
 
 #endregion
 

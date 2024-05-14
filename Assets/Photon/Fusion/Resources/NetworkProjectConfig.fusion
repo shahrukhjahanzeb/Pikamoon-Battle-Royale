@@ -14,7 +14,7 @@
     "HideNetworkObjectInactivityGuard": false,
     "Simulation": {
         "InputDataWordCount": 0,
-        "ReplicationFeatures": 0,
+        "ReplicationFeatures": 1,
         "InputTransferMode": 0,
         "PlayerCount": 10,
         "TickRateSelection": {
@@ -25,8 +25,8 @@
         }
     },
     "Network": {
-        "ConnectionTimeout": 30.0,
-        "ConnectionShutdownTime": 30.0,
+        "ConnectionTimeout": 10.0,
+        "ConnectionShutdownTime": 1.0,
         "ReliableDataTransferModes": 3
     },
     "HostMigration": {
@@ -59,7 +59,9 @@
     "AssembliesToWeave": [
         "Fusion.Unity",
         "Assembly-CSharp",
-        "Assembly-CSharp-firstpass"
+        "Assembly-CSharp-firstpass",
+        "Fusion.Addons.Physics",
+        "Fusion.Addons.FSM"
     ],
     "UseSerializableDictionary": true,
     "NullChecksForNetworkedProperties": true,

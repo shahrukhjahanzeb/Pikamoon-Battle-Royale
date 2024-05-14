@@ -1441,6 +1441,9 @@
             
              There are separate parameters for joining and creating a room.
             
+             Tickets: Both parameter types have a Ticket value. It is enough to set the opJoinRandomRoomParams.Ticket.
+             The createRoomParams.Ticket will not be used.
+            
              This method can only be called while connected to a Master Server.
              This client's State is set to ClientState.Joining immediately.
             
@@ -1570,7 +1573,7 @@
              <param name="enterRoomParams">Definition of properties for the room to join.</param>
              <returns>If the operation could be sent currently (requires connection to Master Server).</returns>
         </member>
-        <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.OpRejoinRoom(System.String)">
+        <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.OpRejoinRoom(System.String,System.Object)">
              <summary>
              Rejoins a room by roomName (using the userID internally to return).  Will callback: OnJoinedRoom or OnJoinRoomFailed.
              </summary>
@@ -1587,6 +1590,9 @@
             
              Rejoining room will not send any player properties. Instead client will receive up-to-date ones from server.
              If you want to set new player properties, do it once rejoined.
+            
+             Tickets: If the server requires use of Tickets or if the room was entered with a Ticket initially,
+             you will have to provide 
              </remarks>
         </member>
         <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.OpLeaveRoom(System.Boolean,System.Boolean)">
@@ -4009,6 +4015,9 @@
              (Use this to cache properties to be sent when joining a room).
              Otherwise, returns if this operation could be sent to the server.
              </returns>
+        </member>
+        <member name="M:Fusion.Photon.Realtime.Player.UpdateNickNameOnJoined">
+            <summary>If there is a nickname in the room props, but it's not the current (local) one, update the room when joining/joined.</summary>
         </member>
         <member name="M:Fusion.Photon.Realtime.Player.SetPlayerNameProperty">
             <summary>Uses OpSetPropertiesOfActor to sync this player's NickName (server is being updated with this.NickName).</summary>

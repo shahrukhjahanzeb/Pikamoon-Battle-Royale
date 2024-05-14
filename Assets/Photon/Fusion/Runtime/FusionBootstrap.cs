@@ -7,6 +7,7 @@ namespace Fusion {
   using UnityEngine.SceneManagement;
   using System.Collections.Generic;
   using System.Linq;
+  using Statistics;
   using UnityEngine.Serialization;
 
 #if UNITY_EDITOR
@@ -100,12 +101,6 @@ namespace Fusion {
     /// </summary>
     [InlineHelp]
     public string DefaultRoomName = string.Empty; // empty/null means Random Room Name
-
-    /// <summary>
-    /// Will automatically enable <see cref="FusionStats"/> once peers have finished connecting.
-    /// </summary>
-    [InlineHelp]
-    public bool AlwaysShowStats;
 
     [NonSerialized]
     NetworkRunner _server;
@@ -510,11 +505,6 @@ namespace Fusion {
       } else {
         yield return StartClients(clientCount, serverMode, sceneRef);
       }
-
-      // Add stats last, so any event systems that may be getting created are already in place.
-      if (includesServerStart && AlwaysShowStats && serverMode != GameMode.Shared) {
-        FusionStats.Create(runner: _server, screenLayout: FusionStats.DefaultLayouts.Left, objectLayout: FusionStats.DefaultLayouts.Left);
-      }
     }
     
     [EditorButton("Add Additional Client", EditorButtonVisibility.PlayMode)]
@@ -556,11 +546,6 @@ namespace Fusion {
 #else
       var clientTask = InitializeNetworkRunner(client, mode, NetAddress.Any(), sceneRef, null);
 #endif
-
-      // Add stats last, so that event systems that may be getting created are already in place.
-      if (AlwaysShowStats && LastCreatedClientIndex == 0) {
-        FusionStats.Create(runner: client, screenLayout: FusionStats.DefaultLayouts.Right, objectLayout: FusionStats.DefaultLayouts.Right);
-      }
 
       return clientTask;
     }
