@@ -35,7 +35,7 @@ public class PlayerController : NetworkBehaviour
         sc.sourceTransform = Camera.main.transform;
         canvasData.GetComponent<LookAtConstraint>().SetSource(0, sc);
         HealthChanged();
-        AttackButton.onClick.AddListener(DealDamageRpc);
+       // AttackButton.onClick.AddListener(DealDamageRpc);
         
 
         if (HasStateAuthority == false)
@@ -58,6 +58,9 @@ public class PlayerController : NetworkBehaviour
             GetComponent<PlayerInput>().enabled = true;
             userName = GameManager.instance._playerName;
          //   StartCoroutine(SpawnTest());// userName);
+           
+           spawnPika= GameObject.FindGameObjectWithTag("Canvas").transform.GetChild(0).transform.GetChild(1).GetComponent<Button>();
+           destroypika = GameObject.FindGameObjectWithTag("Canvas").transform.GetChild(0).transform.GetChild(2).GetComponent<Button>();
             spawnPika.onClick.AddListener(SpawnPika);
             destroypika.onClick.AddListener(DeSpawnPikamoon);
         }
@@ -102,7 +105,7 @@ public class PlayerController : NetworkBehaviour
     void  SpawnPika()
     {
       //  yield return new WaitForSeconds(3);
-        myPikamoon = Runner.Spawn(PrefabPika, new Vector3(0, 0, 0), Quaternion.identity);
+        myPikamoon = Runner.Spawn(PrefabPika,transform.position, Quaternion.identity);
         myPikamoon.GetComponent<PikaMoonMovements>().followMaster = this.transform;
         //yield return new WaitForSeconds(5);
       //  DeSpawnPikamoon();

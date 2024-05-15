@@ -62,22 +62,24 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void SelectCharacter(int characterId)
     {
-        myCharacter=characterId;
+     /*   myCharacter=characterId;
         for(int i=0;i<_canvasCharacterSelection.childCount;i++)
         {
             if(characterId!=i)
             {
 
-                _canvasCharacterSelection.GetChild(i).GetChild(0).gameObject.GetComponent<Outline>().enabled = false;
+                _canvasCharacterSelection.GetChild(i).GetChild(0).gameObject.GetComponent<Out>().enabled = false;
 
             }
             else
-                _canvasCharacterSelection.GetChild(i).GetChild(0).gameObject.GetComponent<Outline>().enabled = true;
-        }
+                _canvasCharacterSelection.GetChild(i).GetChild(0).transform.GetChild(1).gameObject.GetComponent<Outline>().enabled = true;
+        }*/
       //  _canvasCharacterSelection.GetChild(characterId)
     }
     public void SetPlayerName()
     {
+
+        myCharacter =UnityEngine.Random.Range(0,4);
      StartCoroutine ( ConnectToLobby(userInputField.text));
         
     }
@@ -158,7 +160,7 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
 
         await runner.StartGame(new StartGameArgs()
         {
-            Scene = SceneRef.FromIndex(1),  //runner.LoadScene(SceneRef.FromIndex(1),LoadSceneMode.Additive),// SceneManager.LoadScene("GamePlay").,
+            Scene = SceneRef.FromIndex(2),  //runner.LoadScene(SceneRef.FromIndex(1),LoadSceneMode.Additive),// SceneManager.LoadScene("GamePlay").,
             GameMode = GameMode.Shared,
             SessionName = sessionName,
 
@@ -178,7 +180,7 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
         
         await runner.StartGame(new StartGameArgs()
         {
-            Scene = SceneRef.FromIndex(1),
+            Scene = SceneRef.FromIndex(2),
             GameMode = GameMode.Shared,
             SessionName = randomSessionName,
             PlayerCount = 4,
@@ -251,7 +253,8 @@ public class GameManager : MonoBehaviour, INetworkRunnerCallbacks
         if (player == runner.LocalPlayer)
         {
        //     SceneManager.LoadScene(gamePlayScene.name);
-         NetworkObject playerNetworkObject= runner.Spawn(PlayerPrefab, new Vector3(0, 0, 0), Quaternion.identity, player);
+   //      NetworkObject playerNetworkObject= runner.Spawn(PlayerPrefab, new Vector3(0, 0, 0), Quaternion.identity, player);
+            NetworkObject playerNetworkObject = runner.Spawn(PlayerPrefab,PlayerPrefab.transform.position,Quaternion.identity, player);
             runner.SetPlayerObject(player,playerNetworkObject);
            //print( player. .GetComponent<PlayerController>().myHealth);
          }
