@@ -3,7 +3,17 @@ guid: 11d5e213d4b304a46b2f8dd9d6fb610e
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Barkian_BaseColor
+    second: {fileID: 2800000, guid: a6011d2ac6a546443b882807062663ea, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Barkian_Normal
+    second: {fileID: 2800000, guid: 3b78e26d60f698f479a695a59c9ec898, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0

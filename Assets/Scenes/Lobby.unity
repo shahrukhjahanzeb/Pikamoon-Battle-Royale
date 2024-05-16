@@ -520,7 +520,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &276437543
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1079,7 +1079,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 754.55, y: -90}
+  m_AnchoredPosition: {x: 923.4115, y: -90}
   m_SizeDelta: {x: 337.723, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &557154991
@@ -1471,7 +1471,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.20600002}
   m_AnchorMax: {x: 1, y: 0.39000002}
-  m_AnchoredPosition: {x: 0, y: -3.9603882}
+  m_AnchoredPosition: {x: 0, y: -3.9604492}
   m_SizeDelta: {x: -1016.25, y: -106.614746}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &720392405
@@ -3758,7 +3758,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 416.82703, y: -90}
+  m_AnchoredPosition: {x: 585.6885, y: -90}
   m_SizeDelta: {x: 337.723, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1789249258
@@ -3855,6 +3855,53 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1789249256}
   m_CullTransparentMesh: 1
+--- !u!1 &1837475676
+GameObject:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1837475678}
+  - component: {fileID: 1837475677}
+  m_Layer: 0
+  m_Name: Fusion_PhotonBackgroundConnectionHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1837475677
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837475676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1222927710, guid: 7de3b8b9e1263ad479e2d0c4261b7646, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DisconnectAfterKeepAlive: 0
+  KeepAliveInBackground: 60000
+  ApplyDontDestroyOnLoad: 1
+--- !u!4 &1837475678
+Transform:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837475676}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1841437376
 GameObject:
   m_ObjectHideFlags: 0
@@ -4626,8 +4673,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 777.8769, y: -71.6418}
-  m_SizeDelta: {x: 500.64, y: 136.8598}
+  m_AnchoredPosition: {x: 775.8586, y: -71.6418}
+  m_SizeDelta: {x: 499.66147, y: 136.8598}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1778111386589589917
 MonoBehaviour:
@@ -4697,8 +4744,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1256.6135, y: -71.641785}
-  m_SizeDelta: {x: 456.83337, y: 136}
+  m_AnchoredPosition: {x: 1255.3599, y: -71.641785}
+  m_SizeDelta: {x: 459.34094, y: 136}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &4776209445046736856
 MonoBehaviour:
@@ -4880,8 +4927,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 273.77844, y: -71.6418}
-  m_SizeDelta: {x: 507.5569, y: 136.8598}
+  m_AnchoredPosition: {x: 273.01392, y: -71.6418}
+  m_SizeDelta: {x: 506.02786, y: 136.8598}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8138669172065868193
 MonoBehaviour:
@@ -4934,3 +4981,4 @@ SceneRoots:
   - {fileID: 317141516}
   - {fileID: 2003941158}
   - {fileID: 696732124}
+  - {fileID: 1837475678}

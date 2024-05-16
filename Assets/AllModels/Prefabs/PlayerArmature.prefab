@@ -482,7 +482,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerCameraRoot: {fileID: 5328970212448078669}
   playerName: {fileID: 4399739963407058280}
-  PrefabPika: {fileID: 2570491111593434576, guid: b2972501484d09f41bfebfbaac003a63,
+  PrefabPika: {fileID: 5974773810385947797, guid: fc7d2bf39c9029d4e99094b2d5f59609,
     type: 3}
   canvasData: {fileID: 7129484302008918036}
   AttackButton: {fileID: 8161952593677704688}

@@ -21,31 +21,51 @@ public class PikaMoonMovements : NetworkBehaviour
     public int newCirclePositionMinDistance = 0, newCirclePositionMaxDistance = 0;
     /// <summary>
     // Start is called before the first frame update
+
+    public Animator animator;
+
     void Start()
     {
+      
         if (HasStateAuthority)
         {
             navMeshAgent.enabled = true;
+         
+            //  animator= GetComponent<Animator>();
         }
     }
     // Update is called once per frame
     void Update()
     {
         if (HasStateAuthority == true)
-        {   
-           // navMeshAgent.SetDestination(followMaster.position);
+        {
+            
+            // navMeshAgent.SetDestination(followMaster.position);
+       
+            if (navMeshAgent.velocity.magnitude > 0.1f)
+            {
+                // Set blend tree parameter to 1 if moving
+                animator.SetFloat("Move", 1.0f);
+            }
+            else
+            {
+                // Set blend tree parameter to 0 if idle
+                animator.SetFloat("Move", 0.0f);
+            }
 
             //Follow master
             if (Vector3.Distance(followMaster.position, lastPosition) > movementThreshold)
             {
                 lastPosition = followMaster.position; // Update last position
                 navMeshAgent.SetDestination(followMaster.position);
+              //  navMeshAgent.stoppingDistance = 1.0f;
                 ai_isEnabled = false;
             }
             // follow around master on random points
             else
             {
                 ai_isEnabled = true;
+             //   navMeshAgent.stoppingDistance = 0.0f;
                 timer += Time.deltaTime;
                 if (timer >= resetDelayAI)
                 {
