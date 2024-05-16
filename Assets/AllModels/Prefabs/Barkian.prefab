@@ -58,10 +58,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7313975384190113296, guid: 11d5e213d4b304a46b2f8dd9d6fb610e,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 11d5e213d4b304a46b2f8dd9d6fb610e,
         type: 3}
       propertyPath: m_Name
       value: Barkian
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234223297702268787, guid: 11d5e213d4b304a46b2f8dd9d6fb610e,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2234223297702268787, guid: 11d5e213d4b304a46b2f8dd9d6fb610e,
         type: 3}

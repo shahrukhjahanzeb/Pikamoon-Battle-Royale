@@ -45,12 +45,12 @@ public class PikaMoonMovements : NetworkBehaviour
             if (navMeshAgent.velocity.magnitude > 0.1f)
             {
                 // Set blend tree parameter to 1 if moving
-                animator.SetFloat("Move", 1.0f);
+                animator.SetFloat("Move", Mathf.MoveTowards(animator.GetFloat("Move"), 1.0f,Time.deltaTime * 3));
             }
             else
             {
                 // Set blend tree parameter to 0 if idle
-                animator.SetFloat("Move", 0.0f);
+                animator.SetFloat("Move", Mathf.MoveTowards(animator.GetFloat("Move"), 0.0f, Time.deltaTime * 3));
             }
 
             //Follow master
