@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BirdFollowPlayer : MonoBehaviour
+public class BlazewingAI : MonoBehaviour
 {
     public Transform player;
     public float followDistance = 5f;

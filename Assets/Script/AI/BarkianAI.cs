@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class PikaMoonMovements : NetworkBehaviour
+public class BarkianAI : NetworkBehaviour
 {
 
     public Transform followMaster;
