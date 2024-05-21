@@ -14,11 +14,13 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] Transform playerCameraRoot;
     // Start is called before the first frame update
     public TMP_Text playerName;
-    public GameObject PrefabPika;
+    public GameObject PikaMoon_Barkian, PikaMoon_Blazeving;
     public GameObject canvasData;
-    public Button AttackButton,destroypika,spawnPika;
+    Button Destroypika;
+    Button[] PikaButtons=new Button[6];
     public GameObject[] characters;
-    public NetworkObject myPikamoon;
+   // public NetworkObject myPikamoon;
+    public List<NetworkObject> pikaMoon_CharacterList;
     [Networked]
     public string userName { get; set; } = " ";
     [Networked]
@@ -57,12 +59,21 @@ public class PlayerController : NetworkBehaviour
             GetComponent<ThirdPersonController>().enabled = true;
             GetComponent<PlayerInput>().enabled = true;
             userName = GameManager.instance._playerName;
-         //   StartCoroutine(SpawnTest());// userName);
-           
-           spawnPika= GameObject.FindGameObjectWithTag("Canvas").transform.GetChild(0).transform.GetChild(1).GetComponent<Button>();
-           destroypika = GameObject.FindGameObjectWithTag("Canvas").transform.GetChild(0).transform.GetChild(2).GetComponent<Button>();
-            spawnPika.onClick.AddListener(SpawnPika);
-            destroypika.onClick.AddListener(DeSpawnPikamoon);
+            //   StartCoroutine(SpawnTest());// userName);
+
+            // Temp button for pika to spawn in environment
+            Transform temp = GameObject.FindGameObjectWithTag("Canvas").transform.GetChild(1);
+            Destroypika = GameObject.FindGameObjectWithTag("Canvas").transform.GetChild(0).transform.GetChild(2).GetComponent<Button>();
+            Destroypika.onClick.AddListener(DeSpawnPikamoon);
+
+            PikaButtons[0] = temp.transform.GetChild(0).GetComponent<Button>();
+            PikaButtons[1] = temp.transform.GetChild(1).GetComponent<Button>();
+            PikaButtons[2] = temp.transform.GetChild(2).GetComponent<Button>();
+            PikaButtons[3] = temp.transform.GetChild(3).GetComponent<Button>();
+            PikaButtons[4] = temp.transform.GetChild(4).GetComponent<Button>();
+            PikaButtons[5] = temp.transform.GetChild(5).GetComponent<Button>();
+            PikaButtons[0].onClick.AddListener(SpawnPika_Barkian);
+            PikaButtons[1].onClick.AddListener(SpawnPikaMoon_Blazeving);
         }
         canvasData.SetActive(true);
 
@@ -73,7 +84,7 @@ public class PlayerController : NetworkBehaviour
     {
 
 
-        AttackButton.transform.GetChild(0).gameObject.GetComponent<TMP_Text>().text = myHealth.ToString();
+       // AttackButton.transform.GetChild(0).gameObject.GetComponent<TMP_Text>().text = myHealth.ToString();
       
         //   Debug.Log($"Health changed to: {NetworkedHealth}");
     }
@@ -85,10 +96,15 @@ public class PlayerController : NetworkBehaviour
     void DeSpawnPikamoon()
     {
 
-     //   yield return new WaitForSeconds(5f);
-             Destroy(myPikamoon.gameObject);
-        // Update is called once per frame
+        //   yield return new WaitForSeconds(5f);
+        foreach (NetworkObject obj in pikaMoon_CharacterList)
+        {
 
+            Destroy(obj.gameObject);
+            // Update is called once per frame
+
+        }
+        pikaMoon_CharacterList.Clear();
     }
 
 
@@ -102,12 +118,29 @@ public class PlayerController : NetworkBehaviour
     }
 
 
-    void  SpawnPika()
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    void Test2ndRPC()
     {
-      //  yield return new WaitForSeconds(3);
-        myPikamoon = Runner.Spawn(PrefabPika,transform.position, Quaternion.identity);
-        myPikamoon.GetComponent<PikaMoonMovements>().followMaster = this.transform;
-        //yield return new WaitForSeconds(5);
-      //  DeSpawnPikamoon();
+        print("Test");
+    }
+
+
+    void SpawnPika_Barkian()
+    {
+
+        NetworkObject temp=Runner.Spawn(PikaMoon_Barkian,transform.position, Quaternion.identity);
+        temp.GetComponent<PikaMoonMovements>().followMaster = this.transform;
+
+        pikaMoon_CharacterList.Add(temp);
+        temp = null;
+        
+        }
+    void SpawnPikaMoon_Blazeving()
+    {
+        NetworkObject temp = Runner.Spawn(PikaMoon_Blazeving, transform.position, Quaternion.identity);
+      temp.GetComponent<BirdFollowPlayer>().player = this.transform;
+        pikaMoon_CharacterList.Add(temp);
+        temp = null;
     }
 }
