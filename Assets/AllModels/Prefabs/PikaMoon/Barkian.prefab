@@ -1,5 +1,79 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &1319385493751578840
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4710202028670027512}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 71702acd38a1c8d4da889a80eff809f7,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.087
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 71702acd38a1c8d4da889a80eff809f7,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.171
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 71702acd38a1c8d4da889a80eff809f7,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.07
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 71702acd38a1c8d4da889a80eff809f7,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.99913836
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 71702acd38a1c8d4da889a80eff809f7,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.04150605
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 71702acd38a1c8d4da889a80eff809f7,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.000000014901159
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 71702acd38a1c8d4da889a80eff809f7,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.000000027939674
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 71702acd38a1c8d4da889a80eff809f7,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 4.758
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 71702acd38a1c8d4da889a80eff809f7,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 71702acd38a1c8d4da889a80eff809f7,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 71702acd38a1c8d4da889a80eff809f7,
+        type: 3}
+      propertyPath: m_Name
+      value: Stick
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 71702acd38a1c8d4da889a80eff809f7, type: 3}
+--- !u!4 &1568905651879454515 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 71702acd38a1c8d4da889a80eff809f7,
+    type: 3}
+  m_PrefabInstance: {fileID: 1319385493751578840}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6785729254850146756
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -110,7 +184,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -6956303287974742212, guid: 11d5e213d4b304a46b2f8dd9d6fb610e,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1568905651879454515}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 11d5e213d4b304a46b2f8dd9d6fb610e,
         type: 3}
@@ -141,6 +219,12 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2598954949411186237}
   m_SourcePrefab: {fileID: 100100000, guid: 11d5e213d4b304a46b2f8dd9d6fb610e, type: 3}
+--- !u!4 &4710202028670027512 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -6956303287974742212, guid: 11d5e213d4b304a46b2f8dd9d6fb610e,
+    type: 3}
+  m_PrefabInstance: {fileID: 6785729254850146756}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &5974773810385947797 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 11d5e213d4b304a46b2f8dd9d6fb610e,
@@ -265,14 +349,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   followMaster: {fileID: 0}
-  navMeshAgent: {fileID: 4452349277090637673}
   ai_isEnabled: 0
   movementThreshold: 1
   disableThreshold: 5
   resetDelayAI: 7
   newCirclePositionMinDistance: 3
   newCirclePositionMaxDistance: 5
-  animator: {fileID: 8963960710670747800}
 --- !u!114 &2598954949411186237
 MonoBehaviour:
   m_ObjectHideFlags: 0
