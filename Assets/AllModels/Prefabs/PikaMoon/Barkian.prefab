@@ -1546,9 +1546,8 @@ GameObject:
   - component: {fileID: 1218251923884040643}
   - component: {fileID: 283601948140507183}
   - component: {fileID: 8102944215668822625}
-  - component: {fileID: 5070146497090920684}
+  - component: {fileID: -6694478149538545761}
   - component: {fileID: 4455616016452990697}
-  - component: {fileID: 6701085530915376762}
   m_Layer: 0
   m_Name: Barkian
   m_TagString: Untagged
@@ -1655,7 +1654,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 1218251923884040643}
-  - {fileID: 5070146497090920684}
+  - {fileID: -6694478149538545761}
   - {fileID: 4455616016452990697}
 --- !u!195 &8102944215668822625
 NavMeshAgent:
@@ -1679,7 +1678,7 @@ NavMeshAgent:
   m_BaseOffset: -0.1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &5070146497090920684
+--- !u!114 &-6694478149538545761
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1688,7 +1687,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6379564874313023828}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62ddacec7a715744da6f19c1830f2350, type: 3}
+  m_Script: {fileID: 11500000, guid: f276fad6907c683438f1cd8e222c4278, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   followMaster: {fileID: 0}
@@ -1716,20 +1715,6 @@ MonoBehaviour:
   SyncSettings: -1
   StateHashes: 000000008a072c1c08486099
   TriggerHashes: 00000000
---- !u!114 &6701085530915376762
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6379564874313023828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1541381998, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Guid:
-    RawGuidValue: fc7d2bf39c9029d4e99094b2d5f59609
 --- !u!1 &6586663038446452002
 GameObject:
   m_ObjectHideFlags: 0

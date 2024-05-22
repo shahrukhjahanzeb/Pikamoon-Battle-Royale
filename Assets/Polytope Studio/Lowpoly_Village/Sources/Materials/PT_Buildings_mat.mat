@@ -80,7 +80,7 @@ Material:
     - _Ceramic3smoothness: 0.3
     - _EnvironmentReflections: 1
     - _ExteriortextureOnOff: 0
-    - _Exteriorwallstiling: 0.056
+    - _Exteriorwallstiling: 0.063
     - _Float3: 10
     - _Float4: 0.05
     - _Gradient: 1

@@ -130,7 +130,7 @@ public class PlayerController : NetworkBehaviour
     {
 
         NetworkObject temp=Runner.Spawn(PikaMoon_Barkian,transform.position, Quaternion.identity);
-        temp.GetComponent<BarkianAI>().followMaster = this.transform;
+        temp.GetComponent<BarkianPlayerFollowAI>().followMaster = this.transform;
 
         pikaMoon_CharacterList.Add(temp);
         temp = null;
@@ -139,7 +139,7 @@ public class PlayerController : NetworkBehaviour
     void SpawnPikaMoon_Blazeving()
     {
         NetworkObject temp = Runner.Spawn(PikaMoon_Blazeving, transform.position, Quaternion.identity);
-      temp.GetComponent<BlazewingAI>().player = this.transform;
+      temp.GetComponent<BlazewingPlayerFollowAI>().player = this.transform;
         pikaMoon_CharacterList.Add(temp);
         temp = null;
     }
