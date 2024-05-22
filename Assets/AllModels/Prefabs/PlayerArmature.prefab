@@ -482,9 +482,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerCameraRoot: {fileID: 5328970212448078669}
   playerName: {fileID: 4399739963407058280}
-  PikaMoon_Barkian: {fileID: 5974773810385947797, guid: fc7d2bf39c9029d4e99094b2d5f59609,
+  PikaMoon_Barkian: {fileID: 6379564874313023828, guid: ed3791d4406b7a64e9f5a302d8b99495,
     type: 3}
-  PikaMoon_Blazeving: {fileID: 6846665081800937804, guid: 8960e543a9203f241abd99baf06fe4e4,
+  PikaMoon_Blazeving: {fileID: 8007243249918823574, guid: 83ee445fe0878eb44b50f918aa5b72f7,
     type: 3}
   canvasData: {fileID: 7129484302008918036}
   characters:
