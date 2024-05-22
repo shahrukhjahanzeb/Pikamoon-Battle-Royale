@@ -3,7 +3,12 @@ guid: 11d5e213d4b304a46b2f8dd9d6fb610e
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: barkian_rig_v004_Barkian_M1
+    second: {fileID: 2100000, guid: d06dd7caad54b3546b2314363fc03872, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
