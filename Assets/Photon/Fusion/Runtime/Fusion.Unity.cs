@@ -1056,6 +1056,689 @@ namespace Fusion {
 #endregion
 
 
+#region Assets/Photon/Fusion/Runtime/FusionUnityUtility.Common.cs
+
+// merged UnityUtility
+
+#region JsonUtilityExtensions.cs
+
+namespace Fusion {
+  using System;
+  using System.Collections;
+  using System.Collections.Generic;
+  using System.IO;
+  using System.Text;
+  using System.Text.RegularExpressions;
+  using UnityEngine;
+
+  public static class JsonUtilityExtensions {
+    
+    public delegate Type TypeResolverDelegate(string typeName);
+    public delegate string TypeSerializerDelegate(Type type);
+    public delegate string InstanceIDHandlerDelegate(object context, int value);
+    
+    private const string TypePropertyName = "$type";
+
+    public static string EnquoteIntegers(string json, int minDigits = 8) {
+      var result = Regex.Replace(json, $@"(?<="":\s*)(-?[0-9]{{{minDigits},}})(?=[,}}\n\r\s])", "\"$1\"", RegexOptions.Compiled);
+      return result;
+    }
+
+    public static string ToJsonWithTypeAnnotation(object obj, InstanceIDHandlerDelegate instanceIDHandler = null) {
+      var sb = new StringBuilder(1000);
+      using (var writer = new StringWriter(sb)) {
+        ToJsonWithTypeAnnotation(obj, writer, instanceIDHandler: instanceIDHandler);
+      }
+      return sb.ToString();
+    }
+
+    public static void ToJsonWithTypeAnnotation(object obj, TextWriter writer, int? integerEnquoteMinDigits = null, TypeSerializerDelegate typeSerializer = null, InstanceIDHandlerDelegate instanceIDHandler = null) {
+      if (obj == null) {
+        writer.Write("null");
+        return;
+      }
+
+      if (obj is IList list) {
+        writer.Write("[");
+        for (var i = 0; i < list.Count; ++i) {
+          if (i > 0) {
+            writer.Write(",");
+          }
+
+          ToJsonInternal(list[i], writer, integerEnquoteMinDigits, typeSerializer, instanceIDHandler);
+        }
+
+        writer.Write("]");
+      } else {
+        ToJsonInternal(obj, writer, integerEnquoteMinDigits, typeSerializer, instanceIDHandler);
+      }
+    }
+    
+    
+    
+    public static T FromJsonWithTypeAnnotation<T>(string json, TypeResolverDelegate typeResolver = null) {
+      if (typeof(T).IsArray) {
+        var listType = typeof(List<>).MakeGenericType(typeof(T).GetElementType());
+        var list = (IList)Activator.CreateInstance(listType);
+        FromJsonWithTypeAnnotationInternal(json, typeResolver, list);
+
+        var array = Array.CreateInstance(typeof(T).GetElementType(), list.Count);
+        list.CopyTo(array, 0);
+        return (T)(object)array;
+      }
+
+      if (typeof(T).GetInterface(typeof(IList).FullName) != null) {
+        var list = (IList)Activator.CreateInstance(typeof(T));
+        FromJsonWithTypeAnnotationInternal(json, typeResolver, list);
+        return (T)list;
+      }
+
+      return (T)FromJsonWithTypeAnnotationInternal(json, typeResolver);
+    }
+
+    public static object FromJsonWithTypeAnnotation(string json, TypeResolverDelegate typeResolver = null) {
+      Assert.Check(json != null);
+
+      var i = SkipWhiteOrThrow(0);
+      if (json[i] == '[') {
+        var list = new List<object>();
+
+        // list
+        ++i;
+        for (var expectComma = false;; expectComma = true) {
+          i = SkipWhiteOrThrow(i);
+
+          if (json[i] == ']') {
+            break;
+          }
+
+          if (expectComma) {
+            if (json[i] != ',') {
+              throw new InvalidOperationException($"Malformed at {i}: expected ,");
+            }
+            i = SkipWhiteOrThrow(i + 1);
+          }
+
+          var item = FromJsonWithTypeAnnotationToObject(ref i, json, typeResolver);
+          list.Add(item);
+        }
+
+        return list.ToArray();
+      }
+
+      return FromJsonWithTypeAnnotationToObject(ref i, json, typeResolver);
+
+      int SkipWhiteOrThrow(int i) {
+        while (i < json.Length && char.IsWhiteSpace(json[i])) {
+          i++;
+        }
+
+        if (i == json.Length) {
+          throw new InvalidOperationException($"Malformed at {i}: expected more");
+        }
+
+        return i;
+      }
+    }
+
+    
+    private static object FromJsonWithTypeAnnotationInternal(string json, TypeResolverDelegate typeResolver = null, IList targetList = null) {
+      Assert.Check(json != null);
+
+      var i = SkipWhiteOrThrow(0);
+      if (json[i] == '[') {
+        var list = targetList ?? new List<object>();
+
+        // list
+        ++i;
+        for (var expectComma = false;; expectComma = true) {
+          i = SkipWhiteOrThrow(i);
+
+          if (json[i] == ']') {
+            break;
+          }
+
+          if (expectComma) {
+            if (json[i] != ',') {
+              throw new InvalidOperationException($"Malformed at {i}: expected ,");
+            }
+
+            i = SkipWhiteOrThrow(i + 1);
+          }
+
+          var item = FromJsonWithTypeAnnotationToObject(ref i, json, typeResolver);
+          list.Add(item);
+        }
+
+        return targetList ?? ((List<object>)list).ToArray();
+      }
+
+      if (targetList != null) {
+        throw new InvalidOperationException($"Expected list, got {json[i]}");
+      }
+
+      return FromJsonWithTypeAnnotationToObject(ref i, json, typeResolver);
+
+      int SkipWhiteOrThrow(int i) {
+        while (i < json.Length && char.IsWhiteSpace(json[i])) {
+          i++;
+        }
+
+        if (i == json.Length) {
+          throw new InvalidOperationException($"Malformed at {i}: expected more");
+        }
+
+        return i;
+      }
+    }
+
+    private static void ToJsonInternal(object obj, TextWriter writer, 
+      int? integerEnquoteMinDigits = null,
+      TypeSerializerDelegate typeResolver = null,
+      InstanceIDHandlerDelegate instanceIDHandler = null) {
+      Assert.Check(obj != null);
+      Assert.Check(writer != null);
+
+      var json = JsonUtility.ToJson(obj);
+      if (integerEnquoteMinDigits.HasValue) {
+        json = EnquoteIntegers(json, integerEnquoteMinDigits.Value);
+      }
+      
+      var type = obj.GetType();
+
+      writer.Write("{\"");
+      writer.Write(TypePropertyName);
+      writer.Write("\":\"");
+
+      writer.Write(typeResolver?.Invoke(type) ?? SerializableType.GetShortAssemblyQualifiedName(type));
+
+      writer.Write('\"');
+
+      if (json == "{}") {
+        writer.Write("}");
+      } else {
+        Assert.Check('{' == json[0]);
+        Assert.Check('}' == json[^1]);
+        writer.Write(',');
+        
+        if (instanceIDHandler != null) {
+          int i = 1;
+          
+          for (;;) {
+            const string prefix = "{\"instanceID\":";
+            
+            var nextInstanceId = json.IndexOf(prefix, i, StringComparison.Ordinal);
+            if (nextInstanceId < 0) {
+              break;
+            }
+            
+            // parse the number that follows; may be negative
+            var start = nextInstanceId + prefix.Length;
+            var end = json.IndexOf('}', start);
+            var instanceId = int.Parse(json.AsSpan(start, end - start));
+            
+            // append that part
+            writer.Write(json.AsSpan(i, nextInstanceId - i));
+            writer.Write(instanceIDHandler(obj, instanceId));
+            i = end + 1;
+          }
+          
+          writer.Write(json.AsSpan(i, json.Length - i));
+        } else {
+          writer.Write(json.AsSpan(1, json.Length - 1));
+        }
+      }
+    }
+
+    private static object FromJsonWithTypeAnnotationToObject(ref int i, string json, TypeResolverDelegate typeResolver) {
+      if (json[i] == '{') {
+        var endIndex = FindScopeEnd(json, i, '{', '}');
+        if (endIndex < 0) {
+          throw new InvalidOperationException($"Unable to find end of object's end (starting at {i})");
+        }
+        
+        Assert.Check(endIndex > i);
+        Assert.Check(json[endIndex] == '}');
+
+        var part = json.Substring(i, endIndex - i + 1);
+        i = endIndex + 1;
+
+        // read the object, only care about the type; there's no way to map dollar-prefixed property to a C# field,
+        // so some string replacing is necessary
+        var typeInfo = JsonUtility.FromJson<TypeNameWrapper>(part.Replace(TypePropertyName, nameof(TypeNameWrapper.__TypeName), StringComparison.Ordinal));
+
+        Type type;
+        if (typeResolver != null) {
+          type = typeResolver(typeInfo.__TypeName);
+          if (type == null) {
+            return null;
+          }
+        } else {
+          Assert.Check(!string.IsNullOrEmpty(typeInfo?.__TypeName));
+          type = Type.GetType(typeInfo.__TypeName, true);
+        }
+        
+        if (type.IsSubclassOf(typeof(ScriptableObject))) {
+          var instance = ScriptableObject.CreateInstance(type);
+          JsonUtility.FromJsonOverwrite(part, instance);
+          return instance;
+        } else {
+          var instance = JsonUtility.FromJson(part, type);
+          return instance;
+        }
+      }
+
+      if (i + 4 < json.Length && json.AsSpan(i, 4).SequenceEqual("null")) {
+        // is this null?
+        i += 4;
+        return null;
+      }
+
+      throw new InvalidOperationException($"Malformed at {i}: expected {{ or null");
+    }
+    
+    internal static int FindObjectEnd(string json, int start = 0) {
+      return FindScopeEnd(json, start, '{', '}');
+    }
+    
+    private static int FindScopeEnd(string json, int start, char cstart = '{', char cend = '}') {
+      var depth = 0;
+      
+      if (json[start] != cstart) {
+        return -1;
+      }
+
+      for (var i = start; i < json.Length; i++) {
+        if (json[i] == '"') {
+          // can't be escaped
+          Assert.Check('\\' != json[i - 1]);
+          // now skip until the first unescaped quote
+          while (i < json.Length) {
+            if (json[++i] == '"')
+              // are we escaped?
+            {
+              if (json[i - 1] != '\\') {
+                break;
+              }
+            }
+          }
+        } else if (json[i] == cstart) {
+          depth++;
+        } else if (json[i] == cend) {
+          depth--;
+          if (depth == 0) {
+            return i;
+          }
+        }
+      }
+
+      return -1;
+    }
+    
+    [Serializable]
+    private class TypeNameWrapper {
+      public string __TypeName;
+    }
+  }
+}
+
+#endregion
+
+
+#region FusionMppm.cs
+
+namespace Fusion {
+  using System;
+  using System.Collections.Generic;
+  using System.Diagnostics;
+  using System.IO;
+  using System.Linq;
+  using System.Text.RegularExpressions;
+  using System.Threading;
+  using System.Threading.Tasks;
+  using UnityEngine;
+  using Debug = UnityEngine.Debug;
+#if FUSION_ENABLE_MPPM && UNITY_EDITOR
+  using UnityEditor;
+  using UnityEditor.MPE;
+#endif
+
+  // ReSharper disable once IdentifierTypo
+  /// <summary>
+  /// The current status of MPPM. If the package is not enabled, this will always be <see cref="FusionMppmStatus.Disabled"/>.
+  /// </summary>
+  public enum FusionMppmStatus {
+    /// <summary>
+    /// MPPM is not installed.
+    /// </summary>
+    Disabled,
+    /// <summary>
+    /// This instance is the main instance. Can use <see cref="FusionMppm.Broadcast{T}"/> to send commands.
+    /// </summary>
+    MainInstance,
+    /// <summary>
+    /// This instance is a virtual instance. Will receive commands from the main instance.
+    /// </summary>
+    VirtualInstance
+  }
+  
+  /// <summary>
+  /// Support for Multiplayer Play Mode (MPPM). It uses named pipes
+  /// to communicate between the main Unity instance and virtual instances.
+  /// </summary>
+#if FUSION_ENABLE_MPPM && UNITY_EDITOR
+  [InitializeOnLoad]
+#endif
+  // ReSharper disable once IdentifierTypo
+  public static partial class FusionMppm {
+    
+    public static readonly FusionMppmStatus Status = FusionMppmStatus.Disabled;
+    
+#if FUSION_ENABLE_MPPM
+    [Conditional("UNITY_EDITOR")]
+#else
+    [Conditional("FUSION_ENABLE_MPPM")]
+#endif
+    public static void Broadcast<T>(T data) where T : FusionMppmCommand {
+#if FUSION_ENABLE_MPPM && UNITY_EDITOR
+      Assert.Check(Status == FusionMppmStatus.MainInstance, "Only the main instance can send commands");
+      
+      var guid = Guid.NewGuid().ToString();
+      var wrapper = new CommandWrapper() {
+        Guid = guid,
+        Data = data
+      };
+      
+      var str = JsonUtility.ToJson(wrapper);
+      var bytes = System.Text.Encoding.UTF8.GetBytes(str);
+      
+      FusionEditorLog.TraceMppm($"Broadcasting command {str}");
+      ChannelService.BroadcastBinary(s_MPEChannelId, bytes);
+
+      var persistentKey = data.PersistentKey;
+      if (!string.IsNullOrEmpty(persistentKey)) {
+        var fileName = $"{s_invalidFileCharactersRegex.Replace(persistentKey, "_")}.json";
+        var filePath = Path.Combine(s_persistentCommandsFolderPath, fileName);
+        FusionEditorLog.TraceMppm($"Saving persistent command to {filePath}");
+        File.WriteAllText(filePath, str);
+      }
+      
+      if (data.NeedsAck) {
+        // well, we need to wait
+        var channels = ChannelService.GetChannelClientList();
+        // how many acks do we need?
+        var numAcks = channels.Count(x => x.name == s_MPEChannelName);
+        WaitForAcks(numAcks, guid);
+      }
+#endif
+    }
+    
+#if FUSION_ENABLE_MPPM && UNITY_EDITOR
+    private static readonly string s_mainInstancePath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+    private static readonly string s_persistentCommandsFolderPath = "Temp/FusionMppm";
+    private static readonly string s_MPEChannelName = "FusionMppm";
+    private static readonly int s_MPEChannelId = ChannelService.ChannelNameToId(s_MPEChannelName);
+    private static List<(int connectionId, string guid)> s_acks = new List<(int, string)>();
+    private static readonly Regex s_invalidFileCharactersRegex = new Regex(string.Format(@"([{0}]*\.+$)|([{0}]+)", Regex.Escape(new string(Path.GetInvalidFileNameChars()))));
+    
+    static FusionMppm() {
+      
+      var indexOfMppmPrefix = Application.dataPath.LastIndexOf("/Library/VP/mppm", StringComparison.OrdinalIgnoreCase);
+      Status = indexOfMppmPrefix < 0 ? FusionMppmStatus.MainInstance : FusionMppmStatus.VirtualInstance;
+    
+      // start MPE (this check is canonical)
+      if (!ChannelService.IsRunning()) {
+        ChannelService.Start();
+      }
+      
+      FusionEditorLog.TraceMppm($"Status: {Status}, MainInstancePath: {s_mainInstancePath}");
+      
+      if (Status == FusionMppmStatus.MainInstance) {
+        // set up MPE channel
+        var disconnect = ChannelService.GetOrCreateChannel(s_MPEChannelName, (connectionId, data) => {
+          var json = System.Text.Encoding.UTF8.GetString(data);
+          var message = JsonUtility.FromJson<AckMessage>(json);
+          lock (s_acks) {
+            s_acks.Add((connectionId, message.Guid));
+          }
+          FusionEditorLog.TraceMppm($"Received ack {json}");
+        });
+        Debug.Assert(disconnect != null);
+        
+        // ... but since new instances need to e.g. receive all the dependency hashes, set up a folder;
+        // it needs to be cleared on every Unity start but survive between domain reloads
+        string folderOwnedKey = $"Owns_{s_persistentCommandsFolderPath}";
+        
+        if (Directory.Exists(s_persistentCommandsFolderPath) && !SessionState.GetBool(folderOwnedKey, false)) {
+          FusionEditorLog.TraceMppm($"Deleting leftover files from {s_persistentCommandsFolderPath}");
+          foreach (var file in Directory.GetFiles(s_persistentCommandsFolderPath)) {
+            File.Delete(file);
+          }
+        }
+        
+        if (!Directory.Exists(s_persistentCommandsFolderPath)) {
+          FusionEditorLog.TraceMppm($"Creating command folder {s_persistentCommandsFolderPath}");
+          Directory.CreateDirectory(s_persistentCommandsFolderPath);
+        }
+        SessionState.SetBool(folderOwnedKey, true);
+        
+      } else {
+        // where is the main instance located?
+        s_mainInstancePath = Application.dataPath.Substring(0, indexOfMppmPrefix);
+        s_persistentCommandsFolderPath = Path.Combine(s_mainInstancePath, s_persistentCommandsFolderPath);
+        
+        // start the MPE client to await commands
+        var client = ChannelClient.GetOrCreateClient(s_MPEChannelName);
+        client.Start(true);
+        var disconnect = client.RegisterMessageHandler(data => {
+          var json = System.Text.Encoding.UTF8.GetString(data);
+          var message = JsonUtility.FromJson<CommandWrapper>(json);
+          
+          FusionEditorLog.TraceMppm($"Received command {message.Data}");
+          message.Data.Execute();
+          if (message.Data.NeedsAck) {
+            var ack = new AckMessage() {
+              Guid = message.Guid
+            };
+            var ackJson = JsonUtility.ToJson(ack);
+            FusionEditorLog.TraceMppm($"Sending ack {ackJson}");
+            var ackBytes = System.Text.Encoding.UTF8.GetBytes(ackJson);
+            client.Send(ackBytes);
+          }
+        });
+        Debug.Assert(disconnect != null);
+        
+        // read persistent commands from the main instance
+        Debug.Assert(Directory.Exists(s_persistentCommandsFolderPath));
+        foreach (var file in Directory.GetFiles(s_persistentCommandsFolderPath, "*.json")) {
+          var json = File.ReadAllText(file);
+          var wrapper = JsonUtility.FromJson<CommandWrapper>(json);
+          FusionEditorLog.TraceMppm($"Received persistent command {wrapper.Data}");
+          wrapper.Data.Execute();
+        }
+      }
+    }
+    
+    private static void WaitForAcks(int numAcks, string guid) {
+      var timer   = Stopwatch.StartNew();
+      var timeout = TimeSpan.FromSeconds(2);
+      
+      FusionEditorLog.TraceMppm($"Waiting for {numAcks} acks for {guid}");
+      
+      while (timer.Elapsed < timeout) {
+        for (int i = 0; numAcks > 0 && i < s_acks.Count; i++) {
+          var ack = s_acks[i];
+          if (ack.guid == guid) {
+            s_acks.RemoveAt(i);
+            numAcks--;
+              
+            FusionEditorLog.TraceMppm($"Received ack for {guid} from {ack.connectionId}, {numAcks} left");
+          }
+        }
+
+        if (numAcks <= 0) {
+          FusionEditorLog.TraceMppm($"All acks received");
+          return;
+        }
+          
+        FusionEditorLog.TraceMppm($"Waiting for {numAcks} acks");
+        ChannelService.DispatchMessages();
+        Thread.Sleep(10);
+      }
+      
+      FusionEditorLog.TraceMppm($"Timeout waiting for acks ({numAcks} left)");
+    }
+    
+    [Serializable]
+    private class CommandWrapper {
+      public string Guid;
+      [SerializeReference] public FusionMppmCommand Data;
+    }
+
+    [Serializable]
+    private class AckMessage {
+      public string Guid;
+    }
+#endif
+  }
+  
+  /// <summary>
+  /// The base class for all Fusion MPPM commands.
+  /// </summary>
+  [Serializable]
+  // ReSharper disable once IdentifierTypo
+  public abstract class FusionMppmCommand {
+    /// <summary>
+    /// Execute the command on a virtual instance.
+    /// </summary>
+    public abstract void Execute();
+    /// <summary>
+    /// Does the main instance need to wait for an ack?
+    /// </summary>
+    public virtual bool NeedsAck => false;
+    /// <summary>
+    /// If the command is persistent (i.e. needs to be executed on each domain reload), this key is used to store it.
+    /// </summary>
+    public virtual string PersistentKey => null;
+  }
+}
+
+#endregion
+
+
+#region FusionMppmRegisterCustomDependencyCommand.cs
+
+namespace Fusion {
+  using System;
+  using UnityEngine;
+
+#if UNITY_EDITOR
+  [Serializable]
+  public class FusionMppmRegisterCustomDependencyCommand : FusionMppmCommand {
+    public string DependencyName;
+    public string Hash;
+      
+    public override bool NeedsAck => true;
+
+    public override string PersistentKey => $"Dependency_{DependencyName}";
+      
+    public override void Execute() {
+      FusionEditorLog.TraceMppm($"Registering custom dependency {DependencyName} with hash {Hash}");
+      var hash = Hash128.Parse(Hash);
+      UnityEditor.AssetDatabase.RegisterCustomDependency(DependencyName, hash);
+    }
+  }
+#endif
+}
+
+#endregion
+
+
+#region FusionUnityExtensions.cs
+
+namespace Fusion {
+  using UnityEngine;
+
+  public static class FusionUnityExtensions {
+    
+    #region New Find API
+
+#if UNITY_2022_1_OR_NEWER && !UNITY_2022_2_OR_NEWER 
+    public enum FindObjectsInactive {
+      Exclude,
+      Include,
+    }
+
+    public enum FindObjectsSortMode {
+      None,
+      InstanceID,
+    }
+
+    public static T FindFirstObjectByType<T>() where T : Object {
+      return (T)FindFirstObjectByType(typeof(T), FindObjectsInactive.Exclude);
+    }
+
+    public static T FindAnyObjectByType<T>() where T : Object {
+      return (T)FindAnyObjectByType(typeof(T), FindObjectsInactive.Exclude);
+    }
+
+    public static T FindFirstObjectByType<T>(FindObjectsInactive findObjectsInactive) where T : Object {
+      return (T)FindFirstObjectByType(typeof(T), findObjectsInactive);
+    }
+
+    public static T FindAnyObjectByType<T>(FindObjectsInactive findObjectsInactive) where T : Object {
+      return (T)FindAnyObjectByType(typeof(T), findObjectsInactive);
+    }
+
+    public static Object FindFirstObjectByType(System.Type type, FindObjectsInactive findObjectsInactive) {
+      return Object.FindObjectOfType(type, findObjectsInactive == FindObjectsInactive.Include);
+    }
+
+    public static Object FindAnyObjectByType(System.Type type, FindObjectsInactive findObjectsInactive) {
+      return Object.FindObjectOfType(type, findObjectsInactive == FindObjectsInactive.Include);
+    }
+
+    public static T[] FindObjectsByType<T>(FindObjectsSortMode sortMode) where T : Object {
+      return ConvertObjects<T>(FindObjectsByType(typeof(T), FindObjectsInactive.Exclude, sortMode));
+    }
+
+    public static T[] FindObjectsByType<T>(
+      FindObjectsInactive findObjectsInactive,
+      FindObjectsSortMode sortMode)
+      where T : Object {
+      return ConvertObjects<T>(FindObjectsByType(typeof(T), findObjectsInactive, sortMode));
+    }
+
+    public static Object[] FindObjectsByType(System.Type type, FindObjectsSortMode sortMode) {
+      return FindObjectsByType(type, FindObjectsInactive.Exclude, sortMode);
+    }
+
+    public static Object[] FindObjectsByType(System.Type type, FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode) {
+      return Object.FindObjectsOfType(type, findObjectsInactive == FindObjectsInactive.Include);
+    }
+
+    static T[] ConvertObjects<T>(Object[] rawObjects) where T : Object {
+      if (rawObjects == null)
+        return (T[])null;
+      T[] objArray = new T[rawObjects.Length];
+      for (int index = 0; index < objArray.Length; ++index)
+        objArray[index] = (T)rawObjects[index];
+      return objArray;
+    }
+
+#endif
+
+    #endregion
+  }
+}
+
+#endregion
+
+
+
+#endregion
+
+
 #region Assets/Photon/Fusion/Runtime/NetworkObjectBaker.cs
 
 ﻿//#undef UNITY_EDITOR
@@ -1501,31 +2184,171 @@ namespace Fusion {
 #endregion
 
 
+#region Assets/Photon/Fusion/Runtime/Statistics/FusionStatisticsHelper.cs
+
+namespace Fusion.Statistics {
+  using System;
+  using UnityEngine;
+
+  internal static class FusionStatisticsHelper {
+    internal static void GetStatGraphDefaultSettings(RenderSimStats stat, out string valueTextFormat, out float valueTextMultiplier, out bool ignoreZeroOnAverage, out bool ignoreZeroOnBuffer, out TimeSpan bufferTimeSpan, out TimeSpan refreshTimeSpan) {
+
+      valueTextFormat = "{0:0}";
+      valueTextMultiplier = 1f;
+      ignoreZeroOnAverage = false; 
+      ignoreZeroOnBuffer = false;
+      bufferTimeSpan = TimeSpan.Zero; // Default is every update, so span zero.
+      refreshTimeSpan = TimeSpan.Zero; // Default is every update, so span zero.
+      
+      switch (stat) {
+            case RenderSimStats.InPackets:
+            case RenderSimStats.OutPackets:
+            case RenderSimStats.InObjectUpdates:
+            case RenderSimStats.OutObjectUpdates:
+              valueTextFormat = "{0:0}";
+              bufferTimeSpan = TimeSpan.FromSeconds(1);
+              refreshTimeSpan = TimeSpan.FromMilliseconds(50);
+              break;
+            
+            case RenderSimStats.RTT:
+              valueTextFormat = "{0:0} ms";
+              valueTextMultiplier = 1000;
+              ignoreZeroOnAverage = true; ignoreZeroOnBuffer = true;
+              break;
+            
+            case RenderSimStats.InBandwidth:
+            case RenderSimStats.OutBandwidth:
+            case RenderSimStats.InputInBandwidth:
+            case RenderSimStats.InputOutBandwidth:
+              valueTextFormat = "{0:0} B";
+              bufferTimeSpan = TimeSpan.FromSeconds(1);
+              refreshTimeSpan = TimeSpan.FromMilliseconds(50);
+              break;
+            
+            case RenderSimStats.AverageInPacketSize:
+            case RenderSimStats.AverageOutPacketSize:
+              valueTextFormat = "{0:0} B";
+              ignoreZeroOnBuffer = true;
+              ignoreZeroOnAverage = true;
+              break;
+            
+            case RenderSimStats.Resimulations:
+              valueTextFormat = "{0:0}";
+              break;
+            case RenderSimStats.ForwardTicks:
+              valueTextFormat = "{0:0}";
+              break;
+            
+            case RenderSimStats.TimeResets:
+            case RenderSimStats.SimulationSpeed:
+            case RenderSimStats.InterpolationSpeed:
+              valueTextFormat = "{0:0}";
+              break;
+            
+            // All time stats are normalized to use seconds, so 1000 multiplier to be ms.
+            case RenderSimStats.InputReceiveDelta:
+            case RenderSimStats.StateReceiveDelta:
+            case RenderSimStats.SimulationTimeOffset:
+            case RenderSimStats.InterpolationOffset:
+              valueTextMultiplier = 1000;
+              valueTextFormat = "{0:0} ms";
+              break;
+            
+            case RenderSimStats.GeneralAllocatedMemoryInUse:
+            case RenderSimStats.ObjectsAllocatedMemoryInUse:
+              valueTextFormat = "{0:0} B";
+              break;
+            
+            default:
+              valueTextFormat = "{0:0}";
+              break;
+          }
+    }
+
+    internal static float GetStatDataFromSnapshot(RenderSimStats stat, FusionStatisticsSnapshot simulationStatsSnapshot) {
+      switch (stat) {
+            // Sim stats
+            case RenderSimStats.InPackets:
+              return simulationStatsSnapshot.InPackets;
+            case RenderSimStats.OutPackets:
+              return simulationStatsSnapshot.OutPackets;
+            case RenderSimStats.RTT:
+              return simulationStatsSnapshot.RoundTripTime;
+            case RenderSimStats.InBandwidth:
+              return simulationStatsSnapshot.InBandwidth;
+            case RenderSimStats.OutBandwidth:
+              return simulationStatsSnapshot.OutBandwidth;
+            case RenderSimStats.Resimulations:
+              return simulationStatsSnapshot.Resimulations;
+            case RenderSimStats.ForwardTicks:
+              return simulationStatsSnapshot.ForwardTicks;
+            case RenderSimStats.InputInBandwidth:
+              return simulationStatsSnapshot.InputInBandwidth;
+            case RenderSimStats.InputOutBandwidth:
+              return simulationStatsSnapshot.InputOutBandwidth;
+            case RenderSimStats.AverageInPacketSize:
+              return simulationStatsSnapshot.InBandwidth / Mathf.Max(simulationStatsSnapshot.InPackets, 1);
+            case RenderSimStats.AverageOutPacketSize:
+              return simulationStatsSnapshot.OutBandwidth / Mathf.Max(simulationStatsSnapshot.OutPackets, 1);
+            case RenderSimStats.InObjectUpdates:
+              return simulationStatsSnapshot.InObjectUpdates;
+            case RenderSimStats.OutObjectUpdates:
+              return simulationStatsSnapshot.OutObjectUpdates;
+            case RenderSimStats.ObjectsAllocatedMemoryInUse:
+              return simulationStatsSnapshot.ObjectsAllocMemoryUsedInBytes;
+            case RenderSimStats.GeneralAllocatedMemoryInUse:
+              return simulationStatsSnapshot.GeneralAllocMemoryUsedInBytes;
+            
+            // Time stats
+            case RenderSimStats.InputReceiveDelta:
+              return simulationStatsSnapshot.InputReceiveDelta;
+            case RenderSimStats.TimeResets:
+              return simulationStatsSnapshot.TimeResets;
+            case RenderSimStats.StateReceiveDelta:
+              return simulationStatsSnapshot.StateReceiveDelta;
+            case RenderSimStats.SimulationTimeOffset:
+              return simulationStatsSnapshot.SimulationTimeOffset;
+            case RenderSimStats.SimulationSpeed:
+              return simulationStatsSnapshot.SimulationSpeed;
+            case RenderSimStats.InterpolationOffset:
+              return simulationStatsSnapshot.InterpolationOffset;
+            case RenderSimStats.InterpolationSpeed:
+              return simulationStatsSnapshot.InterpolationSpeed;
+          }
+          
+          return default;
+    }
+  }
+}
+
+#endregion
+
+
 #region Assets/Photon/Fusion/Runtime/Statistics/FusionStatsGraphBase.cs
 
 namespace Fusion.Statistics {
-using UnityEngine;
-using UnityEngine.UI;
-using System;
-using System.Globalization;
+  using UnityEngine;
+  using UnityEngine.UI;
+  using System;
+  using System.Globalization;
 
   public abstract partial class FusionStatsGraphBase : MonoBehaviour {
     private static readonly int Samples = Shader.PropertyToID(SHADER_PROPERTY_SAMPLES);
     private static readonly IFormatProvider _formatProvider = CultureInfo.GetCultureInfo("en-US");
 
-    private const string SHADER_PROPERTY_VALUES            = "_Values";
-    private const string SHADER_PROPERTY_SAMPLES           = "_Samples";
-    private const string SHADER_PROPERTY_THRESHOLD_1       = "_Threshold1";
-    private const string SHADER_PROPERTY_THRESHOLD_2       = "_Threshold2";
-    private const string SHADER_PROPERTY_THRESHOLD_3       = "_Threshold3";
-    private const string SHADER_PROPERTY_AVERAGE           = "_Average";
-    
-    private int _valuesShaderPropertyID     = Shader.PropertyToID(SHADER_PROPERTY_VALUES);
+    private const string SHADER_PROPERTY_VALUES = "_Values";
+    private const string SHADER_PROPERTY_SAMPLES = "_Samples";
+    private const string SHADER_PROPERTY_THRESHOLD_1 = "_Threshold1";
+    private const string SHADER_PROPERTY_THRESHOLD_2 = "_Threshold2";
+    private const string SHADER_PROPERTY_THRESHOLD_3 = "_Threshold3";
+    private const string SHADER_PROPERTY_AVERAGE = "_Average";
+
+    private int _valuesShaderPropertyID = Shader.PropertyToID(SHADER_PROPERTY_VALUES);
     private int _threshold1ShaderPropertyID = Shader.PropertyToID(SHADER_PROPERTY_THRESHOLD_1);
     private int _threshold2ShaderPropertyID = Shader.PropertyToID(SHADER_PROPERTY_THRESHOLD_2);
     private int _threshold3ShaderPropertyID = Shader.PropertyToID(SHADER_PROPERTY_THRESHOLD_3);
-    private int _averageShaderPropertyID    = Shader.PropertyToID(SHADER_PROPERTY_AVERAGE);
-    
+    private int _averageShaderPropertyID = Shader.PropertyToID(SHADER_PROPERTY_AVERAGE);
+
     [SerializeField] private RectTransform _render;
     [SerializeField] private RectTransform _header;
     [SerializeField] private Image _targetImage;
@@ -1533,22 +2356,19 @@ using System.Globalization;
     [SerializeField] protected bool _ignoreZeroedValuesOnAverageCalculation;
     [SerializeField] protected bool _ignoreZeroedValuesOnBuffer;
     [SerializeField] protected float _valuesTextUpdateDelay = .1f;
-    [Space] 
-    [SerializeField] private float _valueTextMultiplier = 1f;
+    [Space] [SerializeField] private float _valueTextMultiplier = 1f;
     [SerializeField] private Text _averageValueText;
     [SerializeField] private Text _peakValueText;
     [SerializeField] private Text _currentValueText;
     [SerializeField] private float _threshold1;
     [SerializeField] private float _threshold2;
     [SerializeField] private float _threshold3;
-    [Space]
-    [SerializeField] private Text _threshold1Text;
+    [Space] [SerializeField] private Text _threshold1Text;
     [SerializeField] private Text _threshold2Text;
     [SerializeField] private Text _threshold3Text;
-    
-    [SerializeField][Range(60, 540)]
-    protected int _maxSamples = 300;
-    private float[] _bufferValues;
+
+    [SerializeField] [Range(60, 540)] protected int _maxSamples = 300;
+    private FusionStatBuffer _bufferValues;
     private float[] _bufferNormalizedValues;
 
     private int _bufferHead;
@@ -1557,38 +2377,47 @@ using System.Globalization;
     private float _headerHeight = 25;
     private float _renderHeight = 125;
     private VerticalLayoutGroup _parentLayoutGroup;
-    
-    private float _maxValue;
-    private float _minValue;
-    private float _averageValue;
+
     private float _invertedRenderMaxValue;
     private float _lastUpdateTime;
     private Material _material;
 
-    protected virtual void Initialize() {
+    private bool Initialized => _bufferNormalizedValues != null;
+
+    protected virtual void Initialize(TimeSpan bufferTimeSpan, TimeSpan refreshTimeSpan) {
       _material = new Material(_targetImage.material);
       _targetImage.material = _material;
-      _bufferValues = new float[_maxSamples];
+      _bufferValues = new FusionStatBuffer(_maxSamples, bufferTimeSpan, refreshTimeSpan);
       _bufferNormalizedValues = new float[_maxSamples];
       _parentLayoutGroup = GetComponentInParent<VerticalLayoutGroup>();
-      
-      _lookupTable      = null;
+
+      _lookupTable = null;
       _lookupMultiplier = 1.0f;
 
-      switch (_valueTextFormat)
-      {
-        case "{0:0}"      : { _lookupTable = LOOKUP_TABLE_0;      _lookupMultiplier =   1.0f; break; }
-        case "{0:0} ms"    : { _lookupTable = LOOKUP_TABLE_0ms;    _lookupMultiplier =   1.0f; break; }
-        case "{0:0} B"    : { _lookupTable = LOOKUP_TABLE_0_BYTES;    _lookupMultiplier =   1.0f; break; }
-        case "{0:0.00} ms" : { _lookupTable = LOOKUP_TABLE_0_00ms; _lookupMultiplier = 100.0f; break; }
+      switch (_valueTextFormat) {
+        case "{0:0}": {
+          _lookupTable = LOOKUP_TABLE_0;
+          _lookupMultiplier = 1.0f;
+          break;
+        }
+        case "{0:0} ms": {
+          _lookupTable = LOOKUP_TABLE_0ms;
+          _lookupMultiplier = 1.0f;
+          break;
+        }
+        case "{0:0} B": {
+          _lookupTable = LOOKUP_TABLE_0_BYTES;
+          _lookupMultiplier = 1.0f;
+          break;
+        }
+        case "{0:0.00} ms": {
+          _lookupTable = LOOKUP_TABLE_0_00ms;
+          _lookupMultiplier = 100.0f;
+          break;
+        }
       }
-      
-      Restore();
-    }
 
-    protected virtual void Awake() {
-      Initialize();
-      Refit();
+      Restore();
     }
 
     protected virtual void OnEnable() {
@@ -1620,47 +2449,20 @@ using System.Globalization;
       _ignoreZeroedValuesOnBuffer = ignoreZeroOnBuffer;
     }
 
-    protected virtual void AddValueToBuffer(float value) {
+
+    protected virtual void AddValueToBuffer(float value, ref DateTime now) {
       if (_ignoreZeroedValuesOnBuffer && value == 0) return;
       
-      _bufferHead = (_bufferHead + 1) % _maxSamples;
+      _bufferValues.Add(value, ref now);
 
-      if (_bufferHead == _bufferTail) {
-        _bufferTail = (_bufferTail + 1) % _maxSamples;
+      _invertedRenderMaxValue = 1 / _bufferValues.MaxValue;
+
+      _invertedRenderMaxValue *= .9f; // 10 % more to fell better on render
+
+      for (int i = 0, k = _bufferValues.Index; i < _maxSamples; i++, k = (k+1)%_bufferValues.Length) {
+        _bufferNormalizedValues[i] = _bufferValues[k] * _invertedRenderMaxValue;
       }
-
-      _bufferValues[_bufferHead] = value;
-
-      // Need to update it here to have beforehand the inverted max render value to clamp between 0 and 1.
-      if (value > _maxValue)
-        _maxValue = value;
-
-      _invertedRenderMaxValue = 1 / (_maxValue * 1.1f);
-
-      // Now we can reset the values to update them on the following loop.
-      _minValue = float.MaxValue;
-      _maxValue = float.MinValue;
-
-      float average = 0;
-      int sampleCount = 0;
       
-      for (int i = 0, k = _bufferTail; i < _maxSamples && k != _bufferHead ; i++, k = (k + 1) % _maxSamples) {
-        var bufferValue = _bufferValues[k];
-        
-        if (bufferValue > _maxValue) _maxValue = bufferValue;
-        if (bufferValue < _minValue) _minValue = bufferValue;
-        
-        _bufferNormalizedValues[i] = bufferValue * _invertedRenderMaxValue;
-
-        if (_ignoreZeroedValuesOnAverageCalculation && bufferValue == 0) {
-          continue;
-        }
-        average += bufferValue;
-        sampleCount++;
-      }
-
-      _averageValue = average / sampleCount;
-
       SetGraphValues(_bufferNormalizedValues);
       OnSetValues();
     }
@@ -1668,7 +2470,7 @@ using System.Globalization;
     protected virtual void Refit() {
       var finalHeight = 0f;
       var rect = (RectTransform)transform;
-      
+
       if (_render.gameObject.activeSelf)
         finalHeight += _renderHeight;
       if (_header.gameObject.activeSelf)
@@ -1680,18 +2482,21 @@ using System.Globalization;
     }
 
     protected virtual void Restore() {
+      if (Initialized == false) return;
+      
       _material.SetInteger(Samples, _maxSamples);
       // No need to clear the values buffer because it's a ring buffer, just reset head and tail.
       _bufferHead = 0;
       _bufferTail = 0;
       // The normalized one needs to be cleaned.
       Array.Clear(_bufferNormalizedValues, 0, _maxSamples);
+      Refit();
     }
 
     public virtual void ToggleRenderDisplay() {
       var active = _render.gameObject.activeSelf;
       _render.gameObject.SetActive(!active);
-      
+
       if (active) {
         OnDisable();
         _toggleButton.transform.rotation = Quaternion.Euler(0, 0, 90);
@@ -1699,24 +2504,24 @@ using System.Globalization;
         _toggleButton.transform.rotation = Quaternion.identity;
         OnEnable();
       }
-      
+
       Refit();
     }
 
     protected virtual void OnSetValues() {
-
       if (Time.time >= _lastUpdateTime + _valuesTextUpdateDelay) {
         _lastUpdateTime = Time.time;
-        
-        _averageValueText.text = GetValueText(_averageValue * _valueTextMultiplier);
-        _peakValueText.text = GetValueText(_maxValue * _valueTextMultiplier);
-        _currentValueText.text = GetValueText(_bufferValues[_bufferHead] * _valueTextMultiplier);
+
+        _averageValueText.text = GetValueText(_bufferValues.AverageValue * _valueTextMultiplier);
+        _peakValueText.text = GetValueText(_bufferValues.MaxValue * _valueTextMultiplier);
       }
+      
+      _currentValueText.text = GetValueText(_bufferValues.LatestValue * _valueTextMultiplier);
 
       float normalizedThreshold1 = _threshold1 * _invertedRenderMaxValue;
       float normalizedThreshold2 = _threshold2 * _invertedRenderMaxValue;
       float normalizedThreshold3 = _threshold3 * _invertedRenderMaxValue;
-      
+
       _material.SetFloat(_threshold1ShaderPropertyID, normalizedThreshold1);
       _material.SetFloat(_threshold2ShaderPropertyID, normalizedThreshold2);
       _material.SetFloat(_threshold3ShaderPropertyID, normalizedThreshold3);
@@ -1724,20 +2529,19 @@ using System.Globalization;
       _threshold1Text.text = GetValueText(_threshold1 * _valueTextMultiplier);
       _threshold2Text.text = GetValueText(_threshold2 * _valueTextMultiplier);
       _threshold3Text.text = GetValueText(_threshold3 * _valueTextMultiplier);
-      
+
       UpdateThresholdPosition(_threshold1Text, normalizedThreshold1);
       UpdateThresholdPosition(_threshold2Text, normalizedThreshold2);
       UpdateThresholdPosition(_threshold3Text, normalizedThreshold3);
     }
-    
-    private void UpdateThresholdPosition(Text text, float thresholdNormalized)
-    {
-        Vector3 position = text.rectTransform.anchoredPosition3D;
-        var renderHalfHeight = _targetImage.rectTransform.rect.height * .5f;
-        
-        position.y = RemapValue(thresholdNormalized, 0, 1, -renderHalfHeight, renderHalfHeight);
-        text.rectTransform.anchoredPosition3D = position;
-        text.gameObject.SetActive(thresholdNormalized < 1 && thresholdNormalized > 0);
+
+    private void UpdateThresholdPosition(Text text, float thresholdNormalized) {
+      Vector3 position = text.rectTransform.anchoredPosition3D;
+      var renderHalfHeight = _targetImage.rectTransform.rect.height * .5f;
+
+      position.y = RemapValue(thresholdNormalized, 0, 1, -renderHalfHeight, renderHalfHeight);
+      text.rectTransform.anchoredPosition3D = position;
+      text.gameObject.SetActive(thresholdNormalized < 1 && thresholdNormalized > 0);
     }
 
     /// <summary>
@@ -1746,8 +2550,7 @@ using System.Globalization;
     /// <param name="threshold1">The value for threshold 1.</param>
     /// <param name="threshold2">The value for threshold 2.</param>
     /// <param name="threshold3">The value for threshold 3.</param>
-    public void SetThresholds(float threshold1, float threshold2, float threshold3)
-    {
+    public void SetThresholds(float threshold1, float threshold2, float threshold3) {
       _threshold1 = threshold1 / _valueTextMultiplier;
       _threshold2 = threshold2 / _valueTextMultiplier;
       _threshold3 = threshold3 / _valueTextMultiplier;
@@ -1756,19 +2559,128 @@ using System.Globalization;
     protected virtual void SetGraphValues(float[] values) {
       if (values == null || values.Length == 0)
         return;
-      
-      _material.SetFloat(_averageShaderPropertyID, _averageValue);
+
+      _material.SetFloat(_averageShaderPropertyID, _bufferValues.AverageValue);
       _material.SetFloatArray(_valuesShaderPropertyID, values);
     }
 
     private float RemapValue(float value, float iMin, float iMax, float oMin, float oMax) {
       if (float.IsNaN(value)) return oMin;
-      
+
       var t = Mathf.InverseLerp(iMin, iMax, value);
       return Mathf.Lerp(oMin, oMax, t);
     }
 
-    public abstract void UpdateGraph(NetworkRunner runner, FusionStatisticsManager statisticsManager);
+    public abstract void UpdateGraph(NetworkRunner runner, FusionStatisticsManager statisticsManager, ref DateTime now);
+
+    internal struct FusionStatBuffer {
+      private readonly float[] _buffer;
+      private int _index;
+      private int _count;
+      private readonly TimeSpan _accumulateTimeSpan;
+      private readonly TimeSpan _refreshTimeSpan;
+
+      private float _sum;
+      private float _max;
+      private float _accumulated;
+      private DateTime _lastBufferInsertTime;
+      private DateTime _lastRefreshTime;
+
+      public int Index => _index;
+      public int Length => _buffer.Length;
+      public float MaxValue => _max;
+
+
+      public FusionStatBuffer(int size, TimeSpan accumulateTimeSpan, TimeSpan refreshTimeSpan) {
+        _buffer = new float[size];
+        _index = 0;
+        _count = 0;
+        _accumulateTimeSpan = accumulateTimeSpan;
+        _refreshTimeSpan = refreshTimeSpan;
+        _sum = 0;
+        _max = float.MinValue;
+        _accumulated = 0;
+        _lastBufferInsertTime = DateTime.MinValue;
+        _lastRefreshTime = DateTime.MinValue;
+      }
+
+      public float this[int index] => _buffer[index];
+
+      public void Add(float value, ref DateTime now) {
+        _accumulated += value;
+        
+        // Only accumulate on graph that accumulate for timespan
+        if (now - _lastBufferInsertTime < _accumulateTimeSpan) {
+          // Re-apply latest value to move graphic if refresh time span is ok
+          if (now - _lastRefreshTime >= _refreshTimeSpan) {
+            AddOnBuffer(LatestValue);
+            _lastRefreshTime = now;
+          }
+          
+          return;
+        }
+       
+        AddOnBuffer(_accumulated);
+
+        _accumulated = 0;
+        _lastBufferInsertTime = now;
+      }
+
+      private void AddOnBuffer(float value) {
+         
+        var recalculateMax = false;
+        
+        if (_count == _buffer.Length) {
+          var removingValue = _buffer[_index];
+          _sum -= removingValue;
+
+          if (removingValue >= _max) {
+            recalculateMax = true;
+          }
+        } else {
+          _count++;
+        }
+
+        _buffer[_index] = value;
+        _sum += value;
+        if (_accumulated > _max) {
+          _max = value;
+        }
+
+        _index = (_index + 1) % _buffer.Length;
+
+        if (recalculateMax) {
+          _max = CalculateMax();
+        }
+      }
+
+      public float LatestValue {
+        get {
+          if (_count == 0)
+            throw new InvalidOperationException("Buffer is empty");
+          return _buffer[(_index - 1 + _buffer.Length) % _buffer.Length];
+        }
+      }
+
+      public float AverageValue {
+        get {
+          if (_count == 0)
+            return 0f;
+          return _sum / _count;
+        }
+      }
+
+      private float CalculateMax()
+      {
+        float max = float.MinValue;
+        for (int i = 0; i < _count; i++) {
+          if (_buffer[i] > max) {
+            max = _buffer[i];
+          }
+        }
+        return max;
+      }
+    }
   }
 }
 

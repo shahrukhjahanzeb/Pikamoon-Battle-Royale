@@ -1,12 +1,14 @@
 namespace Fusion.Statistics {
-using UnityEngine;
+  using System;
+  using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.EventSystems;
 using UnityEngine.Profiling;
 
   [RequireComponent(typeof(NetworkRunner))]
   [AddComponentMenu("Fusion/Statistics/Fusion Statistics")]
-  public class FusionStatistics : SimulationBehaviour, ISpawned, IAfterAllTicks {
+  public class FusionStatistics : SimulationBehaviour, ISpawned {
 
     // Setup prefabs
     private GameObject _statsCanvasPrefab;
@@ -122,6 +124,12 @@ using UnityEngine.Profiling;
       
       if (_statsEnabled != 0)
         RenderEnabledStats();
+      
+      // Setup Event system
+      if (!EventSystem.current) {
+        Log.Debug("Fusion Statistics: No event system detected, creating one.");
+        new GameObject("EventSystem-FusionStatistics", typeof(EventSystem), typeof(StandaloneInputModule));
+      }
     }
 
     private void CloseButtonAction() {
@@ -167,8 +175,9 @@ using UnityEngine.Profiling;
     }
 
     void UpdateAllGraphs(FusionStatisticsManager statisticsManager) {
+      var now = DateTime.Now;
       foreach (var statsGraphBase in _statsGraph) {
-        statsGraphBase.UpdateGraph(Runner, statisticsManager);
+        statsGraphBase.UpdateGraph(Runner, statisticsManager, ref now);
       }
     }
 
@@ -180,12 +189,14 @@ using UnityEngine.Profiling;
       _statsGraph.Remove(graph);
     }
 
-    public void AfterAllTicks(bool resimulation, int tickCount) {
+    private void Update() {
+      // Safety exit
+      if (!Runner) return;
+      
+      
       Profiler.BeginSample("Fusion Statistics Update Graph");
 
-      // Only update the graph if at least one forward tick was simulated.
-      if (resimulation || tickCount == 0) return;
-
+      // Collect and update
       if (Runner.TryGetFusionStatistics(out var statisticsManager)) {
         UpdateAllGraphs(statisticsManager);
       }

@@ -2533,6 +2533,14 @@ namespace Fusion.Editor {
 
       IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
+
+    public static void RegisterCustomDependencyWithMppmWorkaround(string customDependency, Hash128 hash) {
+      FusionMppm.Broadcast(new FusionMppmRegisterCustomDependencyCommand() { 
+        DependencyName = customDependency, 
+        Hash = hash.ToString(),
+      });
+      AssetDatabase.RegisterCustomDependency(customDependency, hash);
+    }
   }
 }
 
@@ -3394,7 +3402,6 @@ namespace Fusion.Editor {
     private static string SanitizeTypeName(Type type) {
       return type.FullName.Replace('+', '.');
     }
-
     public static void InvalidateCache() {
       _parsedCodeDocs.Clear();
       _guiContentCache.Clear();
@@ -3507,14 +3514,23 @@ namespace Fusion.Editor {
           if (AssetDatabaseUtils.HasLabel(path, Label)) {
             FusionEditorLog.Trace($"Code doc {path} was imported, refreshing");
             InvalidateCache();
+            continue;
           }
 
           // is there a dll with the same name?
-          if (File.Exists(path.Substring(0, path.Length - ExtensionWithDot.Length) + ".dll")) {
-            FusionEditorLog.Trace($"Detected a dll next to {path}, applying label and refreshing.");
-            AssetDatabaseUtils.SetLabel(path, Label, true);
-            InvalidateCache();
+          if (!File.Exists(path.Substring(0, path.Length - ExtensionWithDot.Length) + ".dll")) {
+            FusionEditorLog.Trace($"No DLL next to {path}, not going to add label {Label}.");
+            continue;
           }
+
+          if (!path.StartsWith("Assets/Photon/")) {
+            FusionEditorLog.Trace($"DLL is out of supported folder, not going to add label: {path}");
+            continue;
+          }
+
+          FusionEditorLog.Trace($"Detected a dll next to {path}, applying label and refreshing.");
+          AssetDatabaseUtils.SetLabel(path, Label, true);
+          InvalidateCache();
         }
       }
     }
@@ -5604,6 +5620,15 @@ namespace Fusion.Editor {
       }
 
       return property;
+    }
+    
+    public static MethodInfo GetMethodOrThrow(this Type type, string methodName, BindingFlags flags = DefaultBindingFlags) {
+      var method = type.GetMethod(methodName, flags);
+      if (method == null) {
+        throw new ArgumentOutOfRangeException(nameof(methodName), CreateFieldExceptionMessage(type.Assembly, type.FullName, methodName, flags));
+      }
+
+      return method;
     }
 
     public static ConstructorInfo GetConstructorInfoOrThrow(this Type type, Type[] types, BindingFlags flags = DefaultBindingFlags) {
@@ -10686,35 +10711,6 @@ namespace Fusion.Editor {
 #endregion
 
 
-#region Assets/Photon/Fusion/Editor/FusionEditorConfigImporter.cs
-
-namespace Fusion.Editor {
-  using System.IO;
-  using UnityEditor.AssetImporters;
-  using UnityEngine;
-
-  [ScriptedImporter(0, "editorconfig")]
-  public class FusionEditorConfigImporter : ScriptedImporter {
-    public override void OnImportAsset(AssetImportContext ctx) {
-      var path      = ctx.assetPath;
-      var contents  = File.ReadAllText(path);
-      
-      // create internal text asset for convenience
-      var mainAsset = new TextAsset(contents);
-      ctx.AddObjectToAsset("main", mainAsset);
-      ctx.SetMainObject(mainAsset);
-
-      // write the actual editorconfig for editors to consume
-      var editorConfigPath = Path.Combine(Path.GetDirectoryName(path), ".editorconfig");
-      File.WriteAllText(editorConfigPath, contents);
-    }
-  }
-}
-
-
-#endregion
-
-
 #region Assets/Photon/Fusion/Editor/FusionHierarchyWindowOverlay.cs
 
 ﻿namespace Fusion.Editor {
@@ -11337,77 +11333,6 @@ namespace Fusion.Editor {
     public SerializedProperty SurrogateProperty;
     [NonSerialized]
     public Type SurrogateType;
-  }
-}
-
-#endregion
-
-
-#region Assets/Photon/Fusion/Editor/FusionWeaverTriggerImporter.cs
-
-namespace Fusion.Editor {
-  using System.IO;
-  using System.Linq;
-  using UnityEditor;
-  using UnityEditor.AssetImporters;
-  using UnityEngine;
-
-  [ScriptedImporter(1, ExtensionWithoutDot, NetworkProjectConfigImporter.ImportQueueOffset + 1)]
-  public class FusionWeaverTriggerImporter : ScriptedImporter {
-    public const string DependencyName = "FusionILWeaverTriggerImporter/ConfigHash";
-    public const string Extension = "." + ExtensionWithoutDot;
-    public const string ExtensionWithoutDot = "fusionweavertrigger";
-    
-    [Tooltip("If enabled, runs the weaver when weaving-related changes are detected in the config file.")]
-    public bool RunWeaverOnConfigChanges = true;
-
-    public override void OnImportAsset(AssetImportContext ctx) {
-      ctx.DependsOnCustomDependency(DependencyName);
-      if (RunWeaverOnConfigChanges) {
-        ILWeaverUtils.RunWeaver();
-      }
-    }
-
-    private static void RefreshDependencyHash() {
-      if (EditorApplication.isCompiling || EditorApplication.isUpdating) {
-        return;
-      }
-      
-      var configPath = NetworkProjectConfigUtilities.GetGlobalConfigPath();
-      if (string.IsNullOrEmpty(configPath)) {
-        return;
-      }
-
-      try {
-        var cfg = NetworkProjectConfigImporter.LoadConfigFromFile(configPath);
-        var hash = new Hash128();
-
-        foreach (var path in cfg.AssembliesToWeave) {
-          hash.Append(path);
-        }
-
-        hash.Append(cfg.UseSerializableDictionary ? 1 : 0);
-        hash.Append(cfg.NullChecksForNetworkedProperties ? 1 : 0);
-        hash.Append(cfg.CheckRpcAttributeUsage ? 1 : 0);
-        hash.Append(cfg.CheckNetworkedPropertiesBeingEmpty ? 1 : 0);
-
-        AssetDatabase.RegisterCustomDependency(DependencyName, hash);
-        AssetDatabase.Refresh();
-      } catch {
-        // ignore the error
-      }
-    }
-
-    private class Postprocessor : AssetPostprocessor {
-      private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths) {
-        foreach (var path in importedAssets) {
-          if (path.EndsWith(NetworkProjectConfigImporter.Extension)) {
-            EditorApplication.delayCall -= RefreshDependencyHash;
-            EditorApplication.delayCall += RefreshDependencyHash;
-          }
-        }
-      }
-    }
   }
 }
 
@@ -12285,310 +12210,6 @@ namespace Fusion.Editor {
     }
   }
 }
-
-#endregion
-
-
-#region Assets/Photon/Fusion/Editor/NetworkPrefabsInspector.cs
-
-namespace Fusion.Editor {
-  using System;
-  using System.Collections.Generic;
-  using System.Linq;
-  using UnityEditor;
-  using UnityEditor.IMGUI.Controls;
-  using UnityEngine;
-  using Object = UnityEngine.Object;
-
-  public class NetworkPrefabsInspector : EditorWindow {
-
-    private Grid _grid = new Grid();
-    
-    [MenuItem("Tools/Fusion/Windows/Network Prefabs Inspector")]
-    [MenuItem("Window/Fusion/Network Prefabs Inspector")]
-    public static void ShowWindow() {
-      var window = GetWindow<NetworkPrefabsInspector>(false, "Network Prefabs Inspector");
-      window.Show();
-    }
-    
-    private void OnEnable() {
-      _grid.PrefabTable = NetworkProjectConfig.Global.PrefabTable;
-      _grid.OnEnable();
-    }
-
-    private void OnInspectorUpdate() {
-      _grid.OnInspectorUpdate();
-    }
-
-    private void OnGUI() {
-      using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar)) {
-        _grid.DrawToolbarReloadButton();
-        _grid.DrawToolbarSyncSelectionButton();
-        GUILayout.FlexibleSpace();
-        
-        EditorGUI.BeginChangeCheck();
-        _grid.OnlyLoaded = GUILayout.Toggle(_grid.OnlyLoaded, "Loaded Only", EditorStyles.toolbarButton);
-        if (EditorGUI.EndChangeCheck()) {
-          _grid.ResetTree();
-        }
-
-        _grid.DrawToolbarSearchField();
-      }
-
-      var rect = GUILayoutUtility.GetRect(GUIContent.none, GUIStyle.none, GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
-      _grid.OnGUI(rect);
-    }
-    
-
-    private enum LoadState {
-      NotLoaded,
-      Loading,
-      LoadedNoInstances,
-      Loaded
-    }
-
-    [Serializable]
-    private class InspectorTreeViewState : TreeViewState {
-      public MultiColumnHeaderState HeaderState;
-      public bool                   SyncSelection;
-    }
-
-    private class GridItem : FusionGridItem {
-      private readonly NetworkPrefabId    _prefabId;
-      private readonly NetworkPrefabTable _prefabTable;
-
-      public GridItem(NetworkPrefabTable prefabTable, NetworkPrefabId prefabId) {
-        _prefabId = prefabId;
-        _prefabTable = prefabTable;
-      }
-      
-      public int InstanceCount => _prefabTable.GetInstancesCount(_prefabId);
-
-      public string Path => AssetDatabase.GUIDToAssetPath(Guid);
-
-      public string Guid => Source?.AssetGuid.ToUnityGuidString() ?? "Null";
-
-      public override Object TargetObject {
-        get {
-          if (Source?.AssetGuid.IsValid == true) {
-            if (NetworkProjectConfigUtilities.TryGetPrefabEditorInstance(Source.AssetGuid, out var result)) {
-              return result.gameObject;
-            }
-          }
-
-          return null;
-        }
-      }
-
-      public INetworkPrefabSource Source => _prefabTable.GetSource(_prefabId);
-
-      public string Description {
-        get => Source?.Description ?? "Null";
-      }
-
-      public LoadState LoadState {
-        get {
-          if (!_prefabTable.IsAcquired(_prefabId)) {
-            return LoadState.NotLoaded;
-          }
-
-          if (!_prefabTable.GetSource(_prefabId).IsCompleted) {
-            return LoadState.Loading;
-          }
-          
-          if (_prefabTable.GetInstancesCount(_prefabId) == 0) {
-            return LoadState.LoadedNoInstances;
-          }
-
-          return LoadState.Loaded;
-        }
-      }
-
-      public NetworkPrefabId PrefabId => _prefabId;
-    }
-
-    [Serializable]
-    class Grid : FusionGrid<GridItem> {
-
-      [SerializeField]
-      public NetworkPrefabTable PrefabTable;
-      [SerializeField]
-      public bool OnlyLoaded;
-
-      public override int GetContentHash() {
-        return PrefabTable?.Version ?? 0;
-      }
-
-      protected override IEnumerable<Column> CreateColumns() {
-        yield return new() {
-          headerContent = new GUIContent("State"),
-          width = 40,
-          autoResize = false,
-          cellGUI = (item, rect, _, _) => {
-            var icon = FusionEditorSkin.LoadStateIcon;
-            string label = "";
-            Color color;
-            switch (item.LoadState) {
-              case LoadState.Loaded:
-                color = Color.green;
-                label = item.InstanceCount.ToString();
-                break;
-              case LoadState.LoadedNoInstances:
-                color = Color.yellow;
-                label = "0";
-                break;
-              case LoadState.Loading:
-                color = Color.yellow;
-                color.a = 0.5f;
-                label = "0";
-                break;
-              default:
-                color = Color.gray;
-                break;
-            }
-
-            using (new FusionEditorGUI.ContentColorScope(color)) {
-              EditorGUI.LabelField(rect, new GUIContent(label, icon, item.LoadState.ToString()));
-            }
-          },
-          getComparer = order => (a, b) => {
-            var result = a.LoadState.CompareTo(b.LoadState) * order;
-            if (result != 0) {
-              return result;
-            }
-            return a.InstanceCount.CompareTo(b.InstanceCount) * order;
-          },
-        };
-        yield return new() {
-          headerContent = new GUIContent("Type"),
-          width = 40,
-          maxWidth = 40,
-          minWidth = 40,
-          cellGUI = (item, rect, _, _) => INetworkPrefabSourceDrawer.DrawThumbnail(rect, item.Source),
-          getComparer = order => (a, b) => EditorUtility.NaturalCompare(a.Source?.GetType().Name ?? "", b.Source?.GetType().Name ?? "") * order,
-        };
-        yield return MakeSimpleColumn(x => x.PrefabId, new() {
-          cellGUI = (item, rect, selected, focused) => TreeView.DefaultGUI.Label(rect, item.PrefabId.ToString(false, false), selected , focused),
-          width = 50,
-          autoResize = false
-        });
-        yield return MakeSimpleColumn(x => x.Path, new() {
-          initiallySorted = true,
-        });
-        yield return MakeSimpleColumn(x => x.Guid, new() {
-          initiallyVisible = false
-        });
-        yield return MakeSimpleColumn(x => x.Description, new() {
-          initiallyVisible = false
-        });
-      }
-
-      protected override IEnumerable<GridItem> CreateRows() {
-        if (PrefabTable == null) {
-          yield break;
-        }
-
-        for (int i = 0; i < PrefabTable.Prefabs.Count; ++i) {
-          var prefabId = NetworkPrefabId.FromIndex(i);
-          if (OnlyLoaded && !PrefabTable.IsAcquired(prefabId)) {
-            continue;
-          }
-          yield return new GridItem(PrefabTable, NetworkPrefabId.FromIndex(i)) { id = (int)(i + 1) };
-        }
-      }
-
-      protected override GenericMenu CreateContextMenu(GridItem item, TreeView treeView) {
-        
-        var menu = new GenericMenu();
-
-        var selection = treeView.GetSelection()
-         .Select(x => NetworkPrefabId.FromIndex(x-1))
-         .ToList();
-
-        var anyLoaded = selection.Any(x => PrefabTable.IsAcquired(x));
-        var anyNotLoaded = selection.Any(x => !PrefabTable.IsAcquired(x));
-        var anyInstances = selection.Any(x => PrefabTable.GetInstancesCount(x) > 0);
-        var spawnerRunners = NetworkRunner.Instances.Where(x => x && x.IsRunning && x.CanSpawn).ToArray();
-        
-        var loadContent = new GUIContent("Load");
-        var loadAsyncContent = new GUIContent("Load (async)");
-        var unloadContent = new GUIContent("Unload");
-        var selectInstancesContent = new GUIContent("Select Instances");
-        var spawnContent = new GUIContent("Spawn");
-        var spawnAsyncContent = new GUIContent("Spawn (async)");
-
-        if (anyNotLoaded) {
-          menu.AddItem(loadContent, false, () => {
-            foreach (var id in selection) {
-              PrefabTable.Load(id, isSynchronous: true);
-            }
-          });
-          menu.AddItem(loadAsyncContent, false, () => {
-            foreach (var id in selection) {
-              PrefabTable.Load(id, isSynchronous: false);
-            }
-          });
-        } else {
-          menu.AddDisabledItem(loadContent);
-          menu.AddDisabledItem(loadAsyncContent);
-        }
-        
-        if (anyLoaded) {
-          menu.AddItem(unloadContent, false, () => {
-            foreach (var id in selection) {
-              PrefabTable.Unload(id);
-            }
-          });
-        } else {
-          menu.AddDisabledItem(unloadContent);
-        }
-
-        if (anyInstances) {
-          menu.AddItem(selectInstancesContent, false, () => {
-            var lookup = new HashSet<NetworkObjectTypeId>(selection.Select(x => NetworkObjectTypeId.FromPrefabId(x)));
-            Selection.objects = FindObjectsByType<NetworkObject>(FindObjectsInactive.Include, FindObjectsSortMode.None)
-             .Where(x => x.NetworkTypeId.IsValid && lookup.Contains(x.NetworkTypeId))
-             .Select(x => x.gameObject)
-             .ToArray();
-          });
-        } else {
-          menu.AddDisabledItem(selectInstancesContent);
-        }
-
-        menu.AddSeparator("");
-        
-        if (spawnerRunners.Any()) {
-          if (spawnerRunners.Length > 1) {
-            foreach (var runner in spawnerRunners.Where(x => x.CanSpawn)) {
-              AddSpawnItems($"/{runner.name}", runner);
-            }
-          } else {
-            AddSpawnItems($"", spawnerRunners[0]);
-          }
-        } else {
-          menu.AddDisabledItem(spawnContent);
-          menu.AddDisabledItem(spawnAsyncContent);
-        }
-
-        void AddSpawnItems(string s, NetworkRunner networkRunner) {
-          menu.AddItem(new GUIContent($"{spawnContent.text}{s}"), false, () => {
-            foreach (var id in selection) {
-              networkRunner.TrySpawn(id, out _);
-            }
-          });
-          menu.AddItem(new GUIContent($"{spawnAsyncContent.text}{s}"), false, () => {
-            foreach (var id in selection) {
-              networkRunner.SpawnAsync(id);
-            }
-          });
-        }
-
-        return menu;
-      }
-    }
-  }
-}
-
 
 #endregion
 

@@ -18,8 +18,8 @@ using UnityEngine.UI;
     private NetworkId _id;
     private NetworkObjectStat _stat;
     
-    public override void UpdateGraph(NetworkRunner runner, FusionStatisticsManager statisticsManager) {
-      AddValueToBuffer(GetNetworkObjectStatValue(statisticsManager));
+    public override void UpdateGraph(NetworkRunner runner, FusionStatisticsManager statisticsManager, ref DateTime now) {
+      AddValueToBuffer(GetNetworkObjectStatValue(statisticsManager), ref now);
     }
 
     private float GetNetworkObjectStatValue(FusionStatisticsManager statisticsManager) {
@@ -49,29 +49,36 @@ using UnityEngine.UI;
       _description.text = _stat.ToString();
       
       string valueTextFormat;
-      float threshold1, threshold2, threshold3;
+      float threshold1 = 0, threshold2 = 0, threshold3 = 0;
       float valueTextMultiplier = 1;
       bool ignoreZeroOnAverage = false, ignoreZeroOnBuffer = false;
+      TimeSpan bufferTimeSpan = TimeSpan.Zero;
+      TimeSpan refreshTimeSpan = TimeSpan.Zero;
 
       switch (stat) {
         
         case NetworkObjectStat.InBandwidth:
         case NetworkObjectStat.OutBandwidth:
+          valueTextFormat = "{0:0} B";
+          bufferTimeSpan = TimeSpan.FromSeconds(1);
+          refreshTimeSpan = TimeSpan.FromMilliseconds(50);
+          break;
         case NetworkObjectStat.AverageInPacketSize:
         case NetworkObjectStat.AverageOutPacketSize:
           valueTextFormat = "{0:0} B";
-          threshold1 = 100; threshold2 = 200; threshold3 = 400;
+          ignoreZeroOnAverage = true;
+          ignoreZeroOnBuffer = true;
           break;
         
         case NetworkObjectStat.InPackets:
         case NetworkObjectStat.OutPackets:
           valueTextFormat = "{0:0}";
-          threshold1 = 1; threshold2 = 3; threshold3 = 5;
+          bufferTimeSpan = TimeSpan.FromSeconds(1);
+          refreshTimeSpan = TimeSpan.FromMilliseconds(50);
           break;
           
         default:
           valueTextFormat = "{0:0}";
-          threshold1 = threshold2 = threshold3 = 0;
           break;
       }
       
@@ -79,7 +86,7 @@ using UnityEngine.UI;
       SetValueTextMultiplier(valueTextMultiplier);
       SetThresholds(threshold1, threshold2, threshold3);
       SetIgnoreZeroValues(ignoreZeroOnAverage, ignoreZeroOnBuffer);
-      Initialize();
+      Initialize(bufferTimeSpan, refreshTimeSpan);
     }
   }
 }

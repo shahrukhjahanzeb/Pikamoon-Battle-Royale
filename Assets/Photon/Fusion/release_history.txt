@@ -1,3 +1,26 @@
+# 2.0.1
+
+## Stable
+
+### Build 835 (May 22, 2024)
+
+**What's New**
+
+- Multiplayer Play Mode (MMPM) support
+- `FusionBoostrap.AutoConnectVirtualInstances` (true by default) - if MPPM is installed, virtual instances will join the main instance once it starts a session
+
+**Changes**
+
+- Fusion Statistics create a new EventSystem if none is detected
+
+**Bug Fixes**
+
+- Fixed: Fusion Menu Missing flag on Unity 6
+- Fixed: Hardened edge case race condition during disconnect
+- Fixed: Fix for too aggressive sequencing bounds check
+- Fixed: Race condition assert in OnPacketDelivered
+- Fixed: Unable to get the player object on PlayerLeft callback
+
 # 2.0.0
 
 For a more in-depth overview over what changed check: [Coming from Fusion 1.0](https://doc.photonengine.com/fusion/v2/getting-started/migration/coming-from-fusion-v1)
