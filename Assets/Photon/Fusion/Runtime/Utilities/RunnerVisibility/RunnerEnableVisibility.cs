@@ -25,6 +25,16 @@ namespace Fusion {
       }
     }
 
+    private float _nextCommonObjectsRefreshTime;
+    private float _commonObjectsRefreshDelay = 1f;
+
+    private void Update() {
+      if (NetworkRunnerVisibilityExtensions.CommonLinksWithMissingInputAuthNeedRefresh && Time.time >= _nextCommonObjectsRefreshTime) {
+        _nextCommonObjectsRefreshTime = Time.time + _commonObjectsRefreshDelay;
+        NetworkRunnerVisibilityExtensions.RetryRefreshCommonLinks();
+      }
+    }
+
     private void OnDestroy() {
       if (TryGetComponent<NetworkRunner>(out var runner)) {
         runner.DisableVisibilityExtension();

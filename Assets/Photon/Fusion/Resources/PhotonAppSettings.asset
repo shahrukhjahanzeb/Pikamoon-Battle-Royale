@@ -16,9 +16,9 @@ MonoBehaviour:
     AppIdFusion: e0204894-79c7-4255-acbe-323ba3d985d9
     AppIdChat: 
     AppIdVoice: 
-    AppVersion: 
+    AppVersion: 0.1
     UseNameServer: 1
-    FixedRegion: 
+    FixedRegion: asia
     Server: 
     Port: 0
     ProxyServer: 
@@ -28,4 +28,4 @@ MonoBehaviour:
     EnableLobbyStatistics: 0
     NetworkLogging: 1
     encryptionMode: 0
-    emptyRoomTtl: 0
+    emptyRoomTtl: 60000

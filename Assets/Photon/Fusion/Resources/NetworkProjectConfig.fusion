@@ -16,7 +16,7 @@
         "InputDataWordCount": 0,
         "ReplicationFeatures": 1,
         "InputTransferMode": 0,
-        "PlayerCount": 10,
+        "PlayerCount": 8,
         "TickRateSelection": {
             "Client": 64,
             "ServerIndex": 0,
@@ -59,7 +59,9 @@
     "AssembliesToWeave": [
         "Fusion.Unity",
         "Assembly-CSharp",
-        "Assembly-CSharp-firstpass"
+        "Assembly-CSharp-firstpass",
+        "Fusion.Addons.Physics",
+        "Fusion.Addons.FSM"
     ],
     "UseSerializableDictionary": true,
     "NullChecksForNetworkedProperties": true,
